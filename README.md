@@ -212,3 +212,73 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosy
 - [Streamlit Dokümantasyonu](https://docs.streamlit.io/)
 - [Technical Analysis Library](https://github.com/bukosabino/ta)
 - [Scikit-learn User Guide](https://scikit-learn.org/stable/user_guide.html)
+
+## 🎉 Kurulum Tamamlandı!
+
+Proje yapısı başarıyla oluşturuldu. Şimdi şu adımları takip edin:
+
+### 1. Sanal Ortam Oluşturun (Opsiyonel ama önerilen)
+```bash
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Mac/Linux
+```
+
+### 2. Gereksinimleri Yükleyin
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Veri Toplayın
+```bash
+python main.py
+```
+
+### 4. EDA Çalıştırın
+```bash
+python run_eda.py
+```
+
+## 📚 Dosya Açıklamaları
+
+- `main.py`: Veri toplama scripti
+- `run_eda.py`: Keşifsel veri analizi scripti
+- `src/analysis/eda.py`: EDA sınıfı
+- `src/utils/visualization.py`: Görselleştirme araçları
+- `data/`: CSV veri dosyaları
+- `outputs/`: Grafikler ve raporlar
+
+## 🎉 Kurulum Tamamlandı!
+
+Proje yapısı başarıyla oluşturuldu. Şimdi şu adımları takip edin:
+
+### 1. Sanal Ortam Oluşturun (Opsiyonel ama önerilen)
+```bash
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Mac/Linux
+```
+
+### 2. Gereksinimleri Yükleyin
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Veri Toplayın
+```bash
+python main.py
+```
+
+### 4. EDA Çalıştırın
+```bash
+python run_eda.py
+```
+
+## 📚 Dosya Açıklamaları
+
+- `main.py`: Veri toplama scripti
+- `run_eda.py`: Keşifsel veri analizi scripti
+- `src/analysis/eda.py`: EDA sınıfı
+- `src/utils/visualization.py`: Görselleştirme araçları
+- `data/`: CSV veri dosyaları
+- `outputs/`: Grafikler ve raporlar

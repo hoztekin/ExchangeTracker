@@ -320,8 +320,6 @@ def main():
     print(f"📁 Konum: ./data/ klasörü")
     print(f"📊 Toplam: {sum(len(df) for df in cleaned_data.values()):,} satır veri")
     print("="*70)
-    print("\n🎯 Sonraki adım: EDA (Exploratory Data Analysis) - 3-4. Hafta")
-    print("="*70 + "\n")
 
 
 if __name__ == "__main__":
