@@ -220,9 +220,6 @@ def main():
     print(f"📁 Grafikler: {output_dir}")
     print(f"📊 Toplam: {len(list(output_dir.glob('*.png')))} görsel oluşturuldu")
     print("="*70)
-    print("\n🎯 Sonraki adım: Teknik Analiz Göstergeleri - 5-7. Hafta")
-    print("="*70 + "\n")
-
 
 if __name__ == "__main__":
     try:

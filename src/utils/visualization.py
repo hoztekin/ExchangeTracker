@@ -301,9 +301,9 @@ class StockVisualizer:
                   'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
 
         colors_monthly = ['green' if x > 0 else 'red' for x in monthly_returns.values]
-        axes[0].bar(range(1, 13), monthly_returns.values, color=colors_monthly, alpha=0.7)
-        axes[0].set_xticks(range(1, 13))
-        axes[0].set_xticklabels(months, rotation=45)
+        axes[0].bar(monthly_returns.index, monthly_returns.values, color=colors_monthly, alpha=0.7)
+        axes[0].set_xticks(monthly_returns.index)
+        axes[0].set_xticklabels([months[i - 1] for i in monthly_returns.index], rotation=45)
         axes[0].set_title('Aylık Ortalama Getiri', fontsize=14, fontweight='bold')
         axes[0].set_ylabel('Ortalama Getiri (%)', fontsize=12)
         axes[0].axhline(y=0, color='black', linestyle='--', alpha=0.5)
@@ -314,9 +314,10 @@ class StockVisualizer:
         days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum']
 
         colors_daily = ['green' if x > 0 else 'red' for x in day_returns.values]
-        axes[1].bar(range(5), day_returns.values, color=colors_daily, alpha=0.7)
-        axes[1].set_xticks(range(5))
-        axes[1].set_xticklabels(days)
+
+        axes[1].bar(day_returns.index, day_returns.values, color=colors_daily, alpha=0.7)
+        axes[1].set_xticks(day_returns.index)
+        axes[1].set_xticklabels([days[i] for i in day_returns.index])
         axes[1].set_title('Haftanın Gününe Göre Ortalama Getiri', fontsize=14, fontweight='bold')
         axes[1].set_ylabel('Ortalama Getiri (%)', fontsize=12)
         axes[1].axhline(y=0, color='black', linestyle='--', alpha=0.5)
