@@ -1,8 +1,27 @@
 # 📈 Borsa Trend Analizi ve Tahmin Sistemi
 
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
+
 Makine öğrenmesi ve teknik analiz göstergeleri kullanarak borsa hareketlerini analiz eden ve tahmin eden kapsamlı bir Python projesi.
 
+## 📑 İçindekiler
+
+- [Proje Özeti](#-proje-özeti)
+- [Özellikler](#-özellikler)
+- [Kurulum](#-kurulum)
+- [Proje Yapısı](#-proje-yapısı)
+- [Kullanım](#-kullanım)
+- [Desteklenen Hisseler](#-desteklenen-hisseler)
+- [Model Performansı](#-model-performansı)
+- [Geliştirme Takvimi](#-geliştirme-takvimi)
+- [Katkıda Bulunma](#-katkıda-bulunma)
+- [Lisans](#-lisans)
+- [Faydalı Kaynaklar](#-faydalı-kaynaklar)
+
 ## 🎯 Proje Özeti
+
 
 Bu proje, **BIST-30** ve **S&P 500** endekslerinden seçili hisse senetlerinin tarihsel verilerini analiz ederek gelecekteki fiyat hareketlerini tahmin etmeyi amaçlamaktadır. Streamlit tabanlı interaktif bir web uygulaması ile kullanıcı dostu bir arayüz sunmaktadır.
 
@@ -11,17 +30,20 @@ Bu proje, **BIST-30** ve **S&P 500** endekslerinden seçili hisse senetlerinin t
 ### 📊 Veri Toplama ve İşleme
 - Yahoo Finance API entegrasyonu
 - 5 yıllık tarihsel OHLCV verileri
+- BIST-30 ve S&P 500 hisseleri desteği
+- Makroekonomik veri entegrasyonu (Döviz kurları, endeksler)
 - Otomatik veri temizleme ve kalite kontrolü
 - Missing values ve outlier detection
 
 ### 📉 Teknik Analiz
-- **Moving Averages**: SMA(20,50), EMA(12,26)
-- **Momentum Göstergeleri**: RSI, Stochastic, Williams %R
-- **Trend Göstergeleri**: MACD, Bollinger Bands, Ichimoku
-- **Volume Göstergeleri**: OBV, Money Flow Index
-- Support/Resistance seviye tespiti
+- **Moving Averages**: SMA(20,50, 200), EMA(12,26)
+- **Trend Göstergeleri**: MACD, Bollinger Bands, ADX
+- **Volume Göstergeleri**: OBV, Volume Weighted Average Price
+- **Pattern Recognition**: Support/Resistance seviyeleri
+- Alım-satım sinyali üretimi
 
 ### 🤖 Makine Öğrenmesi
+ **Planlama Aşamasında** - Gelecek sürümlerde eklenecek
 - Classification Models: Buy/Sell/Hold sinyalleri
 - Regression Models: Gelecek gün fiyat tahmini
 - Time Series: ARIMA, LSTM
@@ -29,11 +51,11 @@ Bu proje, **BIST-30** ve **S&P 500** endekslerinden seçili hisse senetlerinin t
 - Model performans metrikleri: Accuracy, Precision, Recall, Sharpe Ratio
 
 ### 🖥️ Web Uygulaması (Streamlit)
-- **Ana Dashboard**: Market genel bakış, en çok kazananlar/kaybedenler
-- **Hisse Analizi**: İnteraktif grafikler ve teknik göstergeler
-- **Tahmin Modülü**: ML tahminleri ve güven aralıkları
-- **Portföy Simülatörü**: Sanal alım-satım ve kar/zarar takibi
-- **Karşılaştırma**: Çoklu hisse analizi ve korelasyon
+**Planlama Aşamasında** - Gelecek sürümlerde eklenecek
+- İnteraktif dashboard ve görselleştirmeler
+- Gerçek zamanlı hisse takibi
+- Portföy simülasyonu
+- Karşılaştırmalı analiz araçları
 
 ## 🚀 Kurulum
 
