@@ -3,202 +3,367 @@ LazyPredict ile Model Keşfi - Çalıştırma Scripti
 8. Hafta: Otomatik Model Seçimi
 """
 
-import sys
+# ✅ AAPL (S&P 500)
+# ✅ MSFT (S&P 500)
+# ✅ GARAN_IS (BIST-30)
+# ✅ THYAO_IS (BIST-30)
+
+import pandas as pd
+import numpy as np
 from pathlib import Path
-
-sys.path.append(str(Path(__file__).parent))
-
-from src.models.lazy_model_selector import LazyModelSelector
+from sklearn.preprocessing import StandardScaler
 import warnings
 
 warnings.filterwarnings('ignore')
 
+try:
+    from lazypredict.Supervised import LazyClassifier, LazyRegressor
 
-def print_banner(text):
-    """Güzel banner yazdır"""
-    print("\n" + "=" * 70)
-    print(text)
-    print("=" * 70 + "\n")
+    LAZYPREDICT_AVAILABLE = True
+except ImportError:
+    LAZYPREDICT_AVAILABLE = False
+    print("⚠️  LazyPredict kurulu değil!")
+
+
+class FixedLazyModelSelector:
+    """Düzeltilmiş LazyPredict - Infinity/NaN sorunlarını çözer"""
+
+    def __init__(self, data_dir='data/technical'):
+        self.data_dir = Path(data_dir)
+        self.results = {}
+
+        if not LAZYPREDICT_AVAILABLE:
+            raise ImportError("LazyPredict kurulu değil!")
+
+    def load_technical_data(self, ticker):
+        """Teknik analiz verileri yükle"""
+        filename = ticker.replace('^', '').replace('=', '_').replace('.', '_')
+        filepath = self.data_dir / f"{filename}_technical.csv"
+
+        if filepath.exists():
+            df = pd.read_csv(filepath)
+            df['date'] = pd.to_datetime(df['date'])
+            df = df.set_index('date')
+            return df
+        else:
+            print(f"⚠️  {filepath} bulunamadı!")
+            return None
+
+    def clean_data(self, df):
+        """
+        KRİTİK: Infinity, NaN, ve aşırı değerleri temizle
+        """
+        print("   🧹 Veri temizleniyor...")
+
+        # 1. Infinity'leri NaN'a çevir
+        df = df.replace([np.inf, -np.inf], np.nan)
+
+        # 2. Çok büyük değerleri NaN'a çevir (float64 limiti)
+        for col in df.select_dtypes(include=[np.number]).columns:
+            df.loc[np.abs(df[col]) > 1e10, col] = np.nan
+
+        # 3. NaN oranını kontrol et
+        nan_ratio = df.isnull().sum().sum() / (len(df) * len(df.columns))
+        print(f"   📊 NaN oranı: {nan_ratio:.2%}")
+
+        if nan_ratio > 0.5:
+            print(f"   ⚠️  Çok fazla NaN var! Veri kalitesi düşük.")
+
+        return df
+
+    def prepare_features(self, df):
+        """Feature'ları hazırla ve temizle"""
+        base_features = [
+            'rsi_14', 'macd', 'macd_signal', 'macd_hist',
+            'stochastic_k', 'stochastic_d', 'williams_r',
+            'bb_position', 'atr_14', 'mfi_14',
+            'sma_20', 'sma_50', 'ema_12', 'ema_26'
+        ]
+
+        # Ekstra feature'lar ekle
+        df = self._add_extra_features(df)
+
+        extra_features = [
+            'price_change_1d', 'price_change_5d', 'price_change_20d',
+            'volume_change_1d', 'momentum_5', 'momentum_10',
+            'volatility_5', 'volatility_20'
+        ]
+
+        all_features = base_features + extra_features
+        available_features = [f for f in all_features if f in df.columns]
+
+        # Veriyi temizle
+        df = self.clean_data(df)
+
+        print(f"   📊 Kullanılan feature sayısı: {len(available_features)}")
+
+        return df[available_features]
+
+    def _add_extra_features(self, df):
+        """Ekstra feature'lar ekle"""
+        # Fiyat değişimleri
+        df['price_change_1d'] = df['close'].pct_change()
+        df['price_change_5d'] = df['close'].pct_change(5)
+        df['price_change_20d'] = df['close'].pct_change(20)
+
+        # Volume değişimi
+        if 'volume' in df.columns:
+            df['volume_change_1d'] = df['volume'].pct_change()
+            # Volume 0 olanları NaN yap
+            df.loc[df['volume'] == 0, 'volume_change_1d'] = np.nan
+
+        # Momentum
+        df['momentum_5'] = df['close'] - df['close'].shift(5)
+        df['momentum_10'] = df['close'] - df['close'].shift(10)
+
+        # Volatilite
+        df['volatility_5'] = df['close'].rolling(5).std()
+        df['volatility_20'] = df['close'].rolling(20).std()
+
+        # KRİTİK: pct_change sonrası infinity temizliği
+        for col in df.columns:
+            if 'change' in col:
+                # %1000'den fazla değişimleri NaN yap (muhtemelen hata)
+                df.loc[np.abs(df[col]) > 10, col] = np.nan
+
+        return df
+
+    def create_classification_target(self, df, threshold=0.02):
+        """Classification hedef - temizlenmiş"""
+        df['next_day_return'] = df['close'].shift(-1) / df['close'] - 1
+
+        # Infinity temizle
+        df['next_day_return'] = df['next_day_return'].replace([np.inf, -np.inf], np.nan)
+
+        # Aşırı değerleri temizle
+        df.loc[np.abs(df['next_day_return']) > 1, 'next_day_return'] = np.nan
+
+        df['target'] = 0  # HOLD
+        df.loc[df['next_day_return'] > threshold, 'target'] = 1  # BUY
+        df.loc[df['next_day_return'] < -threshold, 'target'] = -1  # SELL
+
+        return df['target']
+
+    def create_regression_target(self, df):
+        """Regression hedef"""
+        return df['close'].shift(-1)
+
+    def run_classification(self, ticker, threshold=0.02, test_size=0.2):
+        """Classification - düzeltilmiş"""
+        print(f"\n{'=' * 70}")
+        print(f"🔍 {ticker} - CLASSIFICATION (Fixed)")
+        print(f"{'=' * 70}\n")
+
+        # 1. Veriyi yükle
+        df = self.load_technical_data(ticker)
+        if df is None:
+            return None
+
+        print(f"   ✅ Veri yüklendi: {len(df)} satır")
+
+        # 2. Feature'ları hazırla
+        X = self.prepare_features(df)
+        y = self.create_classification_target(df, threshold)
+
+        # 3. NaN'ları temizle
+        valid_idx = X.notna().all(axis=1) & y.notna()
+        X = X[valid_idx]
+        y = y[valid_idx]
+
+        print(f"   ✅ Temizleme sonrası: {len(X)} satır")
+
+        if len(X) < 100:
+            print(f"   ❌ Çok az veri kaldı! ({len(X)} satır)")
+            return None
+
+        # 4. Train-test split (TIME-BASED)
+        split_idx = int(len(X) * (1 - test_size))
+        X_train, X_test = X.iloc[:split_idx], X.iloc[split_idx:]
+        y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
+
+        print(f"\n📊 Dataset:")
+        print(f"   • Train: {len(X_train)}, Test: {len(X_test)}")
+        print(f"   • Features: {X.shape[1]}")
+
+        # 5. Normalize - clip extreme values
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+
+        # KRİTİK: Scaled veriden de infinity kontrolü
+        X_train_scaled = np.nan_to_num(X_train_scaled, nan=0.0, posinf=10.0, neginf=-10.0)
+        X_test_scaled = np.nan_to_num(X_test_scaled, nan=0.0, posinf=10.0, neginf=-10.0)
+
+        print(f"\n🚀 LazyPredict çalışıyor...\n")
+
+        try:
+            clf = LazyClassifier(
+                verbose=0,
+                ignore_warnings=True,
+                custom_metric=None,
+                predictions=True
+            )
+
+            models, predictions = clf.fit(
+                X_train_scaled, X_test_scaled,
+                y_train, y_test
+            )
+
+            print("\n" + "=" * 70)
+            print("📊 EN İYİ 10 MODEL")
+            print("=" * 70)
+            print(models.sort_values('F1 Score', ascending=False).head(10).to_string())
+            print("=" * 70 + "\n")
+
+            self.results[f'{ticker}_classification'] = {
+                'models': models,
+                'predictions': predictions,
+                'scaler': scaler,
+                'features': X.columns.tolist()
+            }
+
+            return models
+
+        except Exception as e:
+            print(f"\n❌ Hata: {str(e)}")
+            return None
+
+    def run_regression(self, ticker, test_size=0.2):
+        """Regression - düzeltilmiş"""
+        print(f"\n{'=' * 70}")
+        print(f"📈 {ticker} - REGRESSION (Fixed)")
+        print(f"{'=' * 70}\n")
+
+        df = self.load_technical_data(ticker)
+        if df is None:
+            return None
+
+        print(f"   ✅ Veri yüklendi: {len(df)} satır")
+
+        X = self.prepare_features(df)
+        y = self.create_regression_target(df)
+
+        # NaN temizle
+        valid_idx = X.notna().all(axis=1) & y.notna()
+        X = X[valid_idx]
+        y = y[valid_idx]
+
+        print(f"   ✅ Temizleme sonrası: {len(X)} satır")
+
+        if len(X) < 100:
+            print(f"   ❌ Çok az veri kaldı!")
+            return None
+
+        # Train-test split
+        split_idx = int(len(X) * (1 - test_size))
+        X_train, X_test = X.iloc[:split_idx], X.iloc[split_idx:]
+        y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
+
+        print(f"\n📊 Dataset:")
+        print(f"   • Train: {len(X_train)}, Test: {len(X_test)}")
+
+        # Normalize
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+
+        # Infinity kontrolü
+        X_train_scaled = np.nan_to_num(X_train_scaled, nan=0.0, posinf=10.0, neginf=-10.0)
+        X_test_scaled = np.nan_to_num(X_test_scaled, nan=0.0, posinf=10.0, neginf=-10.0)
+
+        print(f"\n🚀 LazyPredict çalışıyor...\n")
+
+        try:
+            reg = LazyRegressor(
+                verbose=0,
+                ignore_warnings=True,
+                predictions=True
+            )
+
+            models, predictions = reg.fit(
+                X_train_scaled, X_test_scaled,
+                y_train, y_test
+            )
+
+            print("\n" + "=" * 70)
+            print("📊 EN İYİ 10 MODEL")
+            print("=" * 70)
+            print(models.sort_values('R-Squared', ascending=False).head(10).to_string())
+            print("=" * 70 + "\n")
+
+            self.results[f'{ticker}_regression'] = {
+                'models': models,
+                'predictions': predictions,
+                'scaler': scaler,
+                'features': X.columns.tolist()
+            }
+
+            return models
+
+        except Exception as e:
+            print(f"\n❌ Hata: {str(e)}")
+            return None
+
+    def save_results(self, output_dir='outputs/lazy_predict'):
+        """Sonuçları kaydet"""
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"\n{'=' * 70}")
+        print(f"💾 SONUÇLARI KAYDETME")
+        print(f"{'=' * 70}\n")
+
+        for key, result in self.results.items():
+            filepath = output_dir / f"{key}_results.csv"
+            result['models'].to_csv(filepath)
+            print(f"✅ {filepath}")
+
+        print(f"\n📁 Kaydedildi: {output_dir}\n")
 
 
 def main():
-    print_banner("🚀 LAZYPREDICT - OTOMATİK MODEL KEŞFİ")
-    print("8. Hafta: Makine Öğrenmesi - Model Discovery")
-    print("Tüm modeller otomatik test edilecek ve en iyileri belirlenecek!\n")
+    """Test"""
+    print("=" * 70)
+    print("🔧 FIXED LAZYPREDICT - Infinity/NaN Temizleyici")
+    print("=" * 70 + "\n")
 
-    # Selector'ı başlat
-    try:
-        selector = LazyModelSelector(data_dir='data/technical')
-        print("✅ LazyModelSelector başlatıldı\n")
-    except ImportError as e:
-        print(f"❌ HATA: {str(e)}")
-        print("\n💡 ÇÖZÜM:")
-        print("   pip install lazypredict xgboost lightgbm catboost")
-        return
+    selector = FixedLazyModelSelector()
 
-    # Test edilecek hisseler
-    test_tickers = [
-        'THYAO_IS',  # BIST - Türk Hava Yolları
-        'AAPL',  # S&P 500 - Apple
-        'GARAN_IS',  # BIST - Garanti Bankası
-        'MSFT',  # S&P 500 - Microsoft
-    ]
+    # Önce BIST hissesi test et
+    test_tickers = ['THYAO_IS', 'AAPL']
 
-    print(f"📊 Test Edilecek Hisseler:")
-    for i, ticker in enumerate(test_tickers, 1):
-        print(f"   {i}. {ticker}")
+    for ticker in test_tickers:
+        print(f"\n{'🔹' * 35}")
+        print(f"🎯 {ticker} TEST EDİLİYOR")
+        print(f"{'🔹' * 35}\n")
 
-    print(f"\n💡 Her hisse için hem Classification hem Regression test edilecek")
-    print(f"⏱️  Tahmini süre: ~5-10 dakika (hisse başı)")
+        # Classification
+        clf_result = selector.run_classification(ticker, threshold=0.02)
 
-    input("\n▶️  Başlamak için ENTER'a basın...")
+        if clf_result is not None:
+            input("\n▶️  Regression için ENTER...")
 
-    # Sonuçları topla
-    all_results = {
-        'classification': {},
-        'regression': {}
-    }
+            # Regression
+            reg_result = selector.run_regression(ticker)
 
-    # Her hisse için çalıştır
-    for idx, ticker in enumerate(test_tickers, 1):
+        if ticker != test_tickers[-1]:
+            input(f"\n▶️  Sonraki hisse ({test_tickers[test_tickers.index(ticker) + 1]}) için ENTER...")
 
-        print_banner(f"{idx}/{len(test_tickers)} - {ticker}")
+    # Kaydet
+    selector.save_results()
 
-        # ===== CLASSIFICATION =====
-        print(f"🎯 ADIM 1/2: Classification (Sinyal Tahmini)")
-        print(f"   Hedef: Yarın BUY/HOLD/SELL sinyali üret\n")
-
-        try:
-            clf_results = selector.run_classification(
-                ticker,
-                threshold=0.02,  # ±%2 eşik
-                test_size=0.2
-            )
-
-            if clf_results is not None:
-                all_results['classification'][ticker] = clf_results
-                print(f"\n✅ {ticker} Classification tamamlandı!")
-
-                # En iyi 3 modeli göster
-                top_3 = clf_results.sort_values('Accuracy', ascending=False).head(3)
-                print(f"\n🏆 EN İYİ 3 MODEL:")
-                for i, (model_name, row) in enumerate(top_3.iterrows(), 1):
-                    print(f"   {i}. {model_name:30s} → Accuracy: {row['Accuracy']:.3f}")
-            else:
-                print(f"\n⚠️  {ticker} Classification başarısız!")
-
-        except Exception as e:
-            print(f"\n❌ {ticker} Classification hatası: {str(e)}")
-
-        input(f"\n▶️  {ticker} Regression'a geçmek için ENTER...")
-
-        # ===== REGRESSION =====
-        print(f"\n🎯 ADIM 2/2: Regression (Fiyat Tahmini)")
-        print(f"   Hedef: Yarının kapanış fiyatını tahmin et\n")
-
-        try:
-            reg_results = selector.run_regression(
-                ticker,
-                test_size=0.2
-            )
-
-            if reg_results is not None:
-                all_results['regression'][ticker] = reg_results
-                print(f"\n✅ {ticker} Regression tamamlandı!")
-
-                # En iyi 3 modeli göster
-                top_3 = reg_results.sort_values('R-Squared', ascending=False).head(3)
-                print(f"\n🏆 EN İYİ 3 MODEL:")
-                for i, (model_name, row) in enumerate(top_3.iterrows(), 1):
-                    print(f"   {i}. {model_name:30s} → R²: {row['R-Squared']:.3f}, RMSE: {row['RMSE']:.2f}")
-            else:
-                print(f"\n⚠️  {ticker} Regression başarısız!")
-
-        except Exception as e:
-            print(f"\n❌ {ticker} Regression hatası: {str(e)}")
-
-        # Sonraki hisseye geç
-        if idx < len(test_tickers):
-            input(f"\n▶️  Sonraki hisse ({test_tickers[idx]}) için ENTER...")
-
-    # ===== SONUÇLARI KAYDET =====
-    print_banner("💾 SONUÇLARI KAYDETME")
-
-    try:
-        selector.save_results()
-        selector.generate_summary_report()
-        print("✅ Tüm sonuçlar kaydedildi!")
-    except Exception as e:
-        print(f"⚠️  Kaydetme hatası: {str(e)}")
-
-    # ===== GENEL ÖZET =====
-    print_banner("📊 GENEL ÖZET")
-
-    print("✅ TAMAMLANAN İŞLEMLER:")
-    print(f"   • Test edilen hisse sayısı: {len(test_tickers)}")
-    print(f"   • Classification başarılı: {len(all_results['classification'])}")
-    print(f"   • Regression başarılı: {len(all_results['regression'])}")
-
-    if all_results['classification']:
-        print(f"\n🏆 EN İYİ CLASSIFICATION MODELLER (GENEL):")
-
-        # Her hisse için en iyi modeli bul
-        best_models = {}
-        for ticker, results in all_results['classification'].items():
-            best = results.sort_values('Accuracy', ascending=False).iloc[0]
-            best_models[ticker] = (best.name, best['Accuracy'])
-
-        for ticker, (model, acc) in sorted(best_models.items(), key=lambda x: x[1][1], reverse=True):
-            print(f"   • {ticker:12s} → {model:30s} (Acc: {acc:.3f})")
-
-    if all_results['regression']:
-        print(f"\n🏆 EN İYİ REGRESSION MODELLER (GENEL):")
-
-        # Her hisse için en iyi modeli bul
-        best_models = {}
-        for ticker, results in all_results['regression'].items():
-            best = results.sort_values('R-Squared', ascending=False).iloc[0]
-            best_models[ticker] = (best.name, best['R-Squared'])
-
-        for ticker, (model, r2) in sorted(best_models.items(), key=lambda x: x[1][1], reverse=True):
-            print(f"   • {ticker:12s} → {model:30s} (R²: {r2:.3f})")
-
-    # ===== SONRAKİ ADIMLAR =====
-    print_banner("🎯 SONRAKİ ADIMLAR")
-
-    print("1. 📊 Sonuçları İncele:")
-    print("   • outputs/lazy_predict/ klasöründeki CSV'leri aç")
-    print("   • summary_report.txt dosyasını oku")
-
-    print("\n2. 🎯 En İyi Modelleri Seç:")
-    print("   • Classification: XGBoost, LightGBM, RandomForest")
-    print("   • Regression: XGBoost, GradientBoosting, ExtraTrees")
-
-    print("\n3. 🔧 Hiperparametre Tuning:")
-    print("   • Seçilen modelleri GridSearchCV ile optimize et")
-    print("   • Walk-forward validation kullan")
-
-    print("\n4. 💰 Backtesting:")
-    print("   • Gerçek trading simülasyonu yap")
-    print("   • Sharpe Ratio, Max Drawdown hesapla")
-
-    print("\n5. 🚀 Production:")
-    print("   • En iyi modeli kaydet (.pkl)")
-    print("   • Streamlit app'e entegre et")
-
-    print_banner("✨ LAZYPREDICT TAMAMLANDI!")
-
-    print("🎉 Harika! Artık hangi modellerin işe yaradığını biliyorsun!")
-    print("🚀 Sırada: En iyi modelleri optimize etme zamanı!\n")
+    print("\n" + "=" * 70)
+    print("✨ TAMAMLANDI!")
+    print("=" * 70 + "\n")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n⚠️  İşlem kullanıcı tarafından durduruldu.")
+        print("\n\n⚠️  Durduruldu.")
     except Exception as e:
-        print(f"\n❌ Beklenmeyen hata: {str(e)}")
+        print(f"\n❌ Hata: {str(e)}")
         import traceback
 
         traceback.print_exc()
