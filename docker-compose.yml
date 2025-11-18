@@ -1,0 +1,15 @@
+﻿version: '3.8'
+
+services:
+  streamlit-app:
+    build: .
+    container_name: exchangetrack-app
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+    networks:
+      - exchangetrack_network
+
+networks:
+  exchangetrack_network:
+    driver: bridge
