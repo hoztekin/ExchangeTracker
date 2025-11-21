@@ -12,6 +12,8 @@ from pathlib import Path
 import joblib
 from datetime import datetime, timedelta
 import warnings
+import os
+os.chdir('/app')
 
 warnings.filterwarnings('ignore')
 
