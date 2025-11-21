@@ -13,7 +13,10 @@ import joblib
 from datetime import datetime, timedelta
 import warnings
 import os
-os.chdir('/app')
+try:
+    os.chdir('/app')
+except:
+    pass
 
 warnings.filterwarnings('ignore')
 
