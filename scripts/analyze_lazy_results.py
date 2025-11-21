@@ -347,7 +347,7 @@ def main():
     print("🤖 LAZYPREDICT OTOMATIK ANALİZ")
     print("=" * 70 + "\n")
 
-    analyzer = LazyPredictAnalyzer(results_dir='outputs/lazy_predict')
+    analyzer = LazyPredictAnalyzer(results_dir='../outputs/lazy_predict')
 
     if not analyzer.load_results():
         return

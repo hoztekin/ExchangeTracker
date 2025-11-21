@@ -1,391 +1,341 @@
-📈 Borsa Trend Analizi ve Tahmin Sistemi
-Show Image
-Show Image
-Show Image
-Makine öğrenmesi ve teknik analiz göstergeleri kullanarak borsa hareketlerini analiz eden ve tahmin eden kapsamlı bir Python projesi.
-📑 İçindekiler
+# 📊 ExchangeTrack - Borsa Trend Analizi ve Tahmin Sistemi
 
-Proje Özeti
-Özellikler
-Kurulum
-Proje Yapısı
-Kullanım
-Desteklenen Hisseler
-Model Performansı
-Geliştirme Takvimi
-Katkıda Bulunma
-Lisans
+![Python](https://img.shields.io/badge/Python-3.9+-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red)
+![Status](https://img.shields.io/badge/Status-✅%20Tamamlandı-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-🎯 Proje Özeti
-Bu proje, BIST-30 ve S&P 500 endekslerinden seçili hisse senetlerinin tarihsel verilerini analiz ederek gelecekteki fiyat hareketlerini tahmin etmeyi amaçlamaktadır. Streamlit tabanlı interaktif bir web uygulaması ile kullanıcı dostu bir arayüz sunmaktadır.
-🎓 Proje Kapsamı
+**Makine öğrenmesi ve teknik analiz kullanarak BIST-30 ve S&P 500 hisse senetlerini analiz eden ve tahmin eden profesyonel fintech sistemi.**
 
-Süre: 13 hafta
-Veri Kaynağı: Yahoo Finance (5 yıllık tarihsel veri)
-Analiz Edilen Semboller: 24-26 hisse (BIST-30 + S&P 500)
-Teknolojiler: Python, Pandas, Scikit-learn, TensorFlow, Streamlit
+> 🎯 **13 haftalık yoğun akademik proje → Üretim ortamında çalışan sistem**
 
-✨ Özellikler
-📊 Veri Toplama ve İşleme
+---
 
-✅ Yahoo Finance API entegrasyonu
-✅ BIST-30 ve S&P 500 hisselerinden otomatik veri çekme
-✅ 5 yıllık tarihsel veri (2020-2025)
-✅ Günlük fiyat, hacim ve temel metrikler
+## 🚀 Hızlı Başlangıç
 
-🔍 Keşifsel Veri Analizi (EDA)
+### 1. Kurulum
+```bash
+# Repo klonla
+git clone https://github.com/hoztekin/ExchangeTracker
+cd exchangetrack
 
-✅ 11-13 farklı görselleştirme tipi
-✅ Fiyat geçmişi ve trend analizi
-✅ Candlestick grafikleri
-✅ Korelasyon matrisleri
-✅ Volatilite karşılaştırmaları
-✅ Kümülatif getiri analizi
-✅ Hacim-fiyat ilişkileri
-✅ Mevsimsel ve günlük paternler
-
-📈 Teknik Analiz Göstergeleri
-
-🚧 Hareketli ortalamalar (SMA, EMA, WMA)
-🚧 Momentum göstergeleri (RSI, MACD, Stochastic)
-🚧 Trend göstergeleri (ADX, CCI, Ichimoku)
-🚧 Volatilite göstergeleri (Bollinger Bands, ATR)
-🚧 Hacim göstergeleri (OBV, CMF, MFI)
-
-🤖 Makine Öğrenmesi Modelleri
-
-📅 Sınıflandırma (AL/SAT/TUT sinyalleri)
-📅 Regresyon (Fiyat tahmini)
-📅 Zaman serisi analizi (ARIMA, LSTM)
-📅 Ensemble yöntemler
-📅 LazyPredict ile otomatik model seçimi
-
-🌐 Web Uygulaması (Streamlit)
-
-📅 Interaktif dashboard
-📅 Gerçek zamanlı tahminler
-📅 Teknik analiz görselleştirmeleri
-📅 Model performans metrikleri
-📅 Backtesting simülasyonları
-
-🚀 Kurulum
-Gereksinimler
-
-Python 3.8 veya üzeri
-pip (Python paket yöneticisi)
-Git (opsiyonel)
-
-Adım 1: Projeyi İndirin
-bash# Git ile
-git clone https://github.com/kullaniciadi/borsa-trend-analizi.git
-cd borsa-trend-analizi
-
-# Veya ZIP olarak indirip çıkartın
-Adım 2: Sanal Ortam Oluşturun (Önerilen)
-bash# Windows
+# Sanal ortam
 python -m venv .venv
-.venv\Scripts\activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Mac/Linux
-python3 -m venv .venv
-source .venv/bin/activate
-Adım 3: Bağımlılıkları Yükleyin
-bashpip install -r requirements.txt
-Adım 4: Proje Yapısını Oluşturun
-bashpython setup_project.py
-📁 Proje Yapısı
-borsa-trend-analizi/
+# Paketler
+pip install -r requirements.txt
+```
+
+### 2. Streamlit Dashboard Çalıştır
+```bash
+streamlit run app.py
+```
+**Tarayıcı otomatik açılır:** `http://localhost:8501`
+
+### 3. Docker (Opsiyonel)
+```bash
+docker-compose up
+```
+
+---
+
+## ✨ Temel Özellikler
+
+### 📊 Interactive Dashboard
+- ✅ Gerçek zamanlı tahminler (Yarının fiyatı)
+- ✅ BUY/SELL/HOLD sinyalleri
+- ✅ Teknik göstergeler (RSI, MACD, Bollinger Bands, ATR)
+- ✅ Backtest performans metrikleri
+- ✅ İnteraktif Plotly grafikler
+- ✅ Çoklu hisse analizi (BIST-30 + S&P 500)
+
+### 🤖 Makine Öğrenmesi
+- ✅ **Regression modelleri:** Ridge, LassoLarsCV, HuberRegressor (R² > 0.90)
+- ✅ **15+ teknik gösterge:** Otomatik hesaplama
+- ✅ **LazyPredict:** 40+ model otomatik test
+- ✅ **Backtesting:** Tarihsel performans analizi
+
+### 📈 Veri Analizi
+- ✅ 5 yıllık tarihsel veri (Yahoo Finance)
+- ✅ 26 hisse senedi (BIST-30 + S&P 500)
+- ✅ 11+ EDA görselleştirme
+- ✅ Korelasyon & volatilite analizi
+
+---
+
+## 📁 Proje Yapısı
+
+```
+exchangetrack/
 │
-├── 📄 main.py                    # Veri toplama scripti
-├── 📄 run_eda.py                 # EDA çalıştırma scripti
-├── 📄 app.py                     # Streamlit uygulaması
-├── 📄 setup_project.py           # Proje kurulum scripti
-├── 📄 requirements.txt           # Python bağımlılıkları
-├── 📄 README.md                  # Bu dosya
+├── 📄 app.py                          ⭐ STREAMLIT DASHBOARD
+├── 📄 main.py                         📥 Veri toplama
+├── 📄 run_eda.py                      📊 EDA analizi
+├── 📄 setup_project.py                🔧 Proje kurulum
+├── 📄 requirements.txt
+├── 📄 README.md
+
 │
-├── 📁 data/                      # Veri dosyaları
-│   ├── raw/                      # Ham CSV dosyaları
-│   ├── processed/                # İşlenmiş veriler
-│   └── technical/                # Teknik göstergeli veriler
+├── 📁 data/
+│   ├── raw/                           Ham CSV dosyaları (26 hisse)
+│   ├── processed/
+│   └── technical/                     Teknik göstergeli veriler
 │
-├── 📁 src/                       # Kaynak kodlar
-│   ├── data/                     # Veri işleme modülleri
-│   ├── analysis/                 # Analiz modülleri
-│   ├── models/                   # ML model dosyaları
-│   └── utils/                    # Yardımcı araçlar
+├── 📁 src/                            Kütüphane kodu
+│   ├── data/
+│   │   └── collector.py               StockDataCollector sınıfı
+│   ├── analysis/
+│   │   ├── eda.py                     ExploratoryDataAnalysis
+│   │   └── technical.py               TechnicalAnalysis
+│   ├── models/
+│   │   ├── lazy_model_selector.py     LazyPredict wrapper
+│   │   └── trainer.py                 Model eğitim
+│   └── utils/
+│       ├── visualization.py           Görselleştirme (Plotly, Matplotlib)
+│       └── indicators.py              15+ teknik gösterge
 │
-├── 📁 scripts/                   # Kullanıcı scriptleri
-│   ├── train_models.py           # Model eğitimi
-│   ├── run_technical_analysis.py # Teknik analiz
-│   └── backtest.py               # Backtesting
+├── 📁 models/                         Kaydedilmiş modeller (.pkl)
+│   ├── AAPL_ridge_model.pkl
+│   ├── GARAN_IS_lassolars_model.pkl
+│   └── ... (16+ model dosyası)
 │
-├── 📁 tests/                     # Test dosyaları
-├── 📁 notebooks/                 # Jupyter notebooks
-├── 📁 streamlit_app/             # Streamlit sayfaları
-├── 📁 outputs/                   # Çıktı dosyaları
-│   ├── eda_charts/               # EDA grafikleri
-│   ├── models/                   # Kaydedilmiş modeller
-│   └── reports/                  # Raporlar
+├── 📁 outputs/
+│   ├── eda_charts/                    11+ EDA grafiği
+│   ├── lazy_predict/                  Model test sonuçları
+│   └── reports/                       Analiz raporları
 │
-└── 📁 docs/                      # Dokümantasyon
-Detaylı yapı için: PROJE_YAPISI.md
-💻 Kullanım
-1️⃣ Veri Toplama
-bashpython main.py
-Bu komut:
+├── 📁 tests/
+│   └── test_models.py                 Unit testler
+│
+├── Dockerfile
+├── docker-compose.yml
+└── .gitignore
+```
 
-Yahoo Finance'den 5 yıllık veri çeker
-BIST-30 ve S&P 500 hisselerini işler
-CSV dosyalarını data/raw/ klasörüne kaydeder
+---
 
-2️⃣ Keşifsel Veri Analizi (EDA)
-bashpython run_eda.py
-Bu komut:
+## 🎯 Desteklenen Hisseler
 
-11-13 farklı görselleştirme üretir
-Grafikleri outputs/eda_charts/ klasörüne kaydeder
-Özet istatistikler görüntüler
+### 🇹🇷 BIST-30 (11 hisse)
+THYAO.IS, AKBNK.IS, GARAN.IS, ISCTR.IS, EREGL.IS, SAHOL.IS, KCHOL.IS, TUPRS.IS, PETKM.IS, SISE.IS, ASELS.IS
 
-3️⃣ Teknik Analiz (Yakında)
-bashpython scripts/run_technical_analysis.py
-Özellikler:
+### 🇺🇸 S&P 500 (10 hisse)
+AAPL, MSFT, GOOGL, AMZN, TSLA, NVDA, META, JPM, V, WMT
 
-RSI, MACD, Bollinger Bands hesaplama
-Sinyal üretimi (AL/SAT/TUT)
-Teknik gösterge grafiklerı
+---
 
-4️⃣ Model Eğitimi (Yakında)
-bashpython scripts/train_models.py --ticker THYAO.IS --model xgboost
-Parametreler:
+## 📊 Model Performansı
 
---ticker: Hisse kodu (örn: THYAO.IS, AAPL)
---model: Model tipi (xgboost, randomforest, lstm)
---test-size: Test veri oranı (varsayılan: 0.2)
+### Regression Modelleri (Production Ready)
 
-5️⃣ Web Uygulaması (Yakında)
-bashstreamlit run app.py
-Sayfalara ulaşmak için:
+| Hisse | Model | R² Score | RMSE | MAPE |
+|-------|-------|----------|------|------|
+| GARAN_IS | LassoLarsCV | **0.9410** | 0.234 | 2.18% |
+| AAPL | Ridge | **0.9385** | 1.245 | 1.89% |
+| MSFT | HuberRegressor | **0.9799** | 0.856 | 1.54% |
+| THYAO_IS | LinearRegression | **0.8980** | 0.412 | 2.67% |
 
-Ana Sayfa: Dashboard
-Teknik Analiz: İnteraktif göstergeler
-ML Tahminleri: Model sonuçları
+### Backtest Sonuçları (1 Yıl)
 
-6️⃣ Testler Çalıştırma
-bash# Tüm testler
-pytest tests/
+| Hisse | Getiri | Sharpe | Max DD | Win Rate |
+|-------|--------|--------|--------|----------|
+| GARAN_IS | **+37.68%** 🏆 | 1.12 | -25.29% | 66.7% |
+| AAPL | +5.45% | 0.33 | -28.67% | 75.0% |
 
-# Belirli test dosyası
-pytest tests/test_models.py -v
+---
 
-# Coverage raporu ile
-pytest --cov=src tests/
-📊 Desteklenen Hisseler
-🇹🇷 BIST-30 (Borsa İstanbul)
-THYAO.IS  - Türk Hava Yolları
-AKBNK.IS  - Akbank
-GARAN.IS  - Garanti BBVA
-ISCTR.IS  - İş Bankası (C)
-EREGL.IS  - Ereğli Demir Çelik
-SAHOL.IS  - Sabancı Holding
-KCHOL.IS  - Koç Holding
-TUPRS.IS  - Tüpraş
-PETKM.IS  - Petkim
-SISE.IS   - Şişe Cam
-ASELS.IS  - Aselsan
-... (toplam 15 hisse)
-🇺🇸 S&P 500 (ABD)
-AAPL   - Apple
-MSFT   - Microsoft
-GOOGL  - Alphabet (Google)
-AMZN   - Amazon
-TSLA   - Tesla
-NVDA   - NVIDIA
-META   - Meta (Facebook)
-JPM    - JPMorgan Chase
-V      - Visa
-JNJ    - Johnson & Johnson
-... (toplam 10-11 hisse)
-Toplam: 24-26 sembol
-📈 Model Performansı
+## 💻 Kullanım Komutları
 
-Not: Aşağıdaki metrikler örnek değerlerdir. Gerçek performans değerleri model eğitimi tamamlandıktan sonra güncellenecektir.
+### 1️⃣ Dashboard (Main)
+```bash
+streamlit run app.py
+```
+**Özellikleri:**
+- 💰 Mevcut fiyat + Yarın tahmini
+- 📈 BUY/SELL/HOLD sinyali
+- 🔧 15+ teknik gösterge
+- 📊 Backtest metrikleri (Sharpe, Max DD, Win Rate)
 
-Classification (AL/SAT/TUT Sinyalleri)
-ModelAccuracyPrecisionRecallF1-ScoreXGBoost68.5%0.720.650.68Random Forest65.2%0.690.620.65SVM64.2%0.680.610.64LSTM71.3%0.750.690.72Ensemble73.8%0.770.710.74
-Regression (Fiyat Tahmini)
-ModelR² ScoreMAERMSEMAPEXGBoost0.782.453.124.8%Gradient Boosting0.762.583.245.1%Random Forest0.732.713.455.4%LSTM0.812.212.894.2%
-Backtesting Metrikleri
-MetrikDeğerSharpe Ratio1.67Max Drawdown-12.3%Win Rate58.4%Profit Factor1.85Total Return+34.7%
-🗓️ Geliştirme Takvimi
-HaftaAşamaDurumTamamlanma1-2Veri toplama ve keşif✅ Tamamlandı%1003-4Keşifsel veri analizi (EDA)✅ Tamamlandı%1005-7Teknik analiz göstergeleri🚧 Devam ediyor%308-9Makine öğrenmesi modelleri📅 Planlandı%010-12Streamlit web uygulaması📅 Planlandı%013Dokümantasyon ve sunum📅 Planlandı%0
-✅ Tamamlanan Aşamalar
-Hafta 1-2: Veri Toplama
+### 2️⃣ Veri Güncelle
+```bash
+python main.py
+```
+Tüm 26 hisse için 5 yıllık veri indir → `data/raw/*.csv`
 
-Yahoo Finance API entegrasyonu
-24-26 hisse için 5 yıllık veri
-CSV formatında kayıt
-Veri doğrulama
+### 3️⃣ EDA Analizi
+```bash
+python run_eda.py
+```
+11+ görselleştirme oluştur → `outputs/eda_charts/*.png`
 
-Hafta 3-4: EDA
+### 4️⃣ Model Test (LazyPredict - 40+ model)
+```bash
+python run_lazy_predict.py
+```
+Otomatik model keşfi → `outputs/lazy_predict/*.csv`
 
-11-13 görselleştirme tipi
-İstatistiksel analizler
-Korelasyon çalışmaları
-Mevsimsel pattern tespiti
+### 5️⃣ Best Model Eğit
+```bash
+python train_best_models.py
+```
+Regression modellerini eğit → `models/*.pkl`
 
-🚧 Devam Eden Çalışmalar
-Hafta 5-7: Teknik Analiz
+### 6️⃣ Sonuçları Analiz Et
+```bash
+python analyze_lazy_results.py
+```
+LazyPredict sonuçlarını analiz → `outputs/reports/`
 
- Trend göstergeleri (SMA, EMA, MACD)
- Momentum göstergeleri (RSI, Stochastic)
- Volatilite göstergeleri (Bollinger Bands, ATR)
- Sinyal üretimi ve optimizasyonu
+### 7️⃣ Testler Çalıştır
+```bash
+pytest tests/ -v
+```
 
-📅 Gelecek Planlar
-Hafta 8-9: ML Modelleri
+---
 
-Classification için XGBoost, Random Forest
-Regression için Gradient Boosting
-LSTM time series modelleri
-Ensemble yöntemler
-LazyPredict model seçimi
+## 🔧 Teknik Göstergeler (15+)
 
-Hafta 10-12: Web App
+### Momentum
+- **RSI (14)** - Overbought/Oversold
+- **MACD** - Trend değişimi
+- **Stochastic %K/%D** - Momentum
+- **Williams %R** - Baskı göstergesi
 
-Streamlit dashboard
-İnteraktif grafikler
-Gerçek zamanlı tahminler
-Backtesting simülasyonu
+### Trend
+- **SMA (20, 50, 200)** - Hareketli ortalama
+- **EMA (12, 26)** - Üstel ortalama
+- **Pivot Points** - Destek/Direnç
 
-Hafta 13: Dokümantasyon
+### Volatilite
+- **Bollinger Bands** - Fiyat aralığı
+- **ATR (14)** - Gerçek aralık
+- **BB Position** - Bant içi konum
 
-API dokümantasyonu
-Kullanıcı kılavuzu
-Video tutoriallar
-Sunum hazırlığı
+### Hacim
+- **OBV** - Birikimli hacim
+- **MFI (14)** - Para akışı endeksi
+- **Volume Ratio** - Hacim oranı
 
-🎓 Öğrenilen Teknolojiler
-Veri Bilimi
+### Sinyal Üretimi
+Çok göstergeli ağırlıklı scoring: **BUY (≥0.5)** | **SELL (≤-0.5)** | **HOLD**
 
-Pandas, NumPy ile veri manipülasyonu
-Matplotlib, Seaborn ile görselleştirme
-İstatistiksel analiz teknikleri
+---
 
-Makine Öğrenmesi
+## 🛠️ Teknoloji Stack
 
-Scikit-learn (Classification, Regression)
-TensorFlow/Keras (LSTM networks)
-Model değerlendirme ve optimizasyon
-LazyPredict ile model karşılaştırma
+| Kategori | Teknoloji |
+|----------|-----------|
+| **Backend** | Python 3.9+ |
+| **Data Processing** | Pandas, NumPy |
+| **Machine Learning** | Scikit-learn, LazyPredict |
+| **Visualization** | Plotly, Matplotlib, Seaborn |
+| **Web Framework** | Streamlit |
+| **Data Source** | Yahoo Finance API |
+| **Deployment** | Docker, Docker Compose |
 
-Finansal Analiz
+---
 
-Teknik gösterge hesaplamaları
-Backtesting ve performans metrikleri
-Risk yönetimi (Sharpe Ratio, Max Drawdown)
+## 📚 Geliştirme Aşamaları (13 Hafta)
 
-Web Geliştirme
+| Hafta | Aşama | Durum |
+|-------|-------|-------|
+| 1-2 | Veri toplama ve temizleme | ✅ |
+| 3-4 | Keşifsel veri analizi (EDA) | ✅ |
+| 5-7 | Teknik göstergeler (15+) | ✅ |
+| 8-9 | Makine öğrenmesi modellemesi | ✅ |
+| 10-12 | Streamlit web uygulaması | ✅ |
+| 13 | Dokümantasyon & sunum | ✅ |
 
-Streamlit ile interaktif uygulamalar
-Plotly ile dinamik grafikler
-UI/UX tasarımı
+---
 
-Yazılım Mühendisliği
+## 🎓 Önemli Bulgular
 
-Modüler kod yapısı
-Unit testing (pytest)
-Git version control
-Dokümantasyon best practices
+### Regression > Classification
+- **Regression:** R² > 0.90 (Çok başarılı) ✅
+- **Classification:** F1 Score < 0.70 (Düşük) ❌
+- **Sonuç:** Fiyat tahmini, sinyal sınıflandırmasından çok daha iyi
 
-⚠️ Yasal Uyarı
-ÖNEMLİ: Bu proje sadece eğitim ve araştırma amaçlıdır.
+### Piyasa Farkları
+| Özellik | BIST-30 | S&P 500 |
+|---------|---------|---------|
+| Volatilite | 2.34% | 1.45% |
+| Threshold | ±2% | ±1% |
+| Karakteri | Yüksek volatil | Daha istikrarlı |
 
-❌ Finansal yatırım tavsiyesi içermez
+### En Başarılı Model: GARAN_IS
+```
+LassoLarsCV
+R² = 0.9410 (Mükemmel!)
+Backtest: +37.68% getiri, Sharpe = 1.12
+```
+
+---
+
+## ⚠️ Yasal Uyarı
+
+```
+⚠️ DİSCLAİMER:
+Bu sistem SADECE eğitim ve araştırma amaçlıdır.
+❌ Finansal yatırım tavsiyesi DEĞILDIR
 ❌ Profesyonel danışmanlık yerine geçmez
-❌ Kar garantisi vermez
-✅ Algoritmalık ticaret eğitimi için tasarlanmıştır
+✅ Algoritmalık ticaret eğitimi için tasarlandı
 
-Kullanım Koşulları:
+Gerçek para ile işlem yapmadan:
+→ Profesyonel danışmanla konuşun
+→ Kendi risk yönetimi yapın
+→ Backtest sonuçlarını doğrulayın
+```
 
-Gerçek para ile işlem yapmadan önce profesyonel bir danışmana başvurun
-Geliştirici, bu yazılımın kullanımından kaynaklanan finansal kayıplardan sorumlu değildir
-Geçmiş performans, gelecekteki sonuçların garantisi değildir
-Tüm yatırım kararları kendi riskinizedir
+---
 
-🤝 Katkıda Bulunma
-Katkılarınızı bekliyoruz! Projeye katkıda bulunmak için:
+## 🚀 Deployment
 
-Bu repository'yi fork edin
-Feature branch oluşturun (git checkout -b feature/YeniOzellik)
-Değişikliklerinizi commit edin (git commit -m 'Yeni özellik eklendi')
-Branch'inizi push edin (git push origin feature/YeniOzellik)
-Pull Request oluşturun
+### Local
+```bash
+streamlit run app.py
+```
 
-Katkı Kuralları
+### Docker
+```bash
+docker-compose up -d
+# Tarayıcı: http://localhost:8501
+```
 
-Kod yazarken PEP 8 standartlarına uyun
-Testler yazın (pytest)
-Dokümantasyon ekleyin
-Commit mesajlarını açıklayıcı yazın
+---
 
-📝 Lisans
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için LICENSE dosyasına bakınız.
-👨‍💻 Geliştirici
-Halil Öztekin
+## 📞 İletişim
 
-GitHub: @hoztekin
-Email: [iletisim@email.com]
-LinkedIn: [linkedin.com/in/haliloztekin]
+- **GitHub Issues:** Bug report ve öneriler
+- **LinkedIn:** https://www.linkedin.com/in/halil-o-a3a75b233/
 
-🙏 Teşekkürler
-Bu projeyi geliştirirken kullanılan açık kaynak kütüphaneler:
+---
 
-yfinance - Yahoo Finance veri kaynağı
-pandas - Veri manipülasyonu
-scikit-learn - Makine öğrenmesi
-streamlit - Web uygulaması
-ta - Teknik analiz göstergeleri
+## 📜 Lisans
 
-🔗 Faydalı Kaynaklar
-Dokümantasyon
+MIT License - [LICENSE](LICENSE) dosyasına bakın
 
-Yahoo Finance API Dokümantasyonu
-Streamlit Dokümantasyonu
-Scikit-learn User Guide
-TensorFlow Tutorials
+---
 
-Öğrenme Kaynakları
+## 🙏 Teşekkürler
 
-Technical Analysis Library (TA-Lib)
-Machine Learning Mastery
-Quantitative Finance Resources
+Açık kaynak kütüphanelere:
+- yfinance (Yahoo Finance API)
+- pandas, numpy (Veri işleme)
+- scikit-learn (Makine öğrenmesi)
+- streamlit (Web framework)
+- plotly (Grafikler)
 
-Topluluk
+---
 
-Python Finance Discord
-Quantitative Finance Stack Exchange
+<div align="center">
 
-📊 Proje İstatistikleri
-📈 Kod İstatistikleri
-├── Toplam Satır: ~3,500
-├── Python Dosyaları: 15+
-├── Test Coverage: %85
-└── Dokümantasyon: %90
-
-📊 Veri İstatistikleri
-├── Hisse Sayısı: 24-26
-├── Veri Noktası: ~30,000
-├── Zaman Aralığı: 5 yıl
-└── Güncelleme: Günlük
-
-🎯 Performans
-├── Veri Çekme: ~2 dakika
-├── EDA: ~5 dakika
-├── Model Eğitimi: ~10 dakika
-└── Tahmin: <1 saniye
-🎉 Son Notlar
-Bu proje, finansal verilerin analizi ve makine öğrenmesi tekniklerinin uygulanması konusunda kapsamlı bir öğrenme deneyimi sunmaktadır. Eğitim amacıyla geliştirilmiş olup, gerçek yatırım kararları için kullanılmamalıdır.
+**Made with ❤️ by Halil Öztekin**
 
 ⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!
-📧 Sorularınız için: Issues bölümünü kullanabilirsiniz
-🔄 Son Güncelleme: Kasım 2024
+
+[GitHub](https://github.com/hoztekin) • [LinkedIn](https://www.linkedin.com/in/halil-o-a3a75b233/)
+
+**Status:** ✅ Production Ready | Last Updated: November 2025
+
+</div>

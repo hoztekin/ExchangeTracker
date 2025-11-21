@@ -176,7 +176,7 @@ class BestModelTrainer:
         print(f"      ✅ CV R² Ortalama: {cv_scores.mean():.4f} (±{cv_scores.std():.4f})")
 
         # Modeli kaydet
-        model_dir = Path('models')
+        model_dir = Path('../models')
         model_dir.mkdir(exist_ok=True)
 
         clean_ticker = ticker.replace('.', '_').replace('^', '').replace('=', '_')
