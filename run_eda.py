@@ -26,7 +26,7 @@ def main():
     print("="*70 + "\n")
 
     # EDA ve Visualizer başlat
-    eda = ExploratoryDataAnalysis(data_dir='data')
+    eda = ExploratoryDataAnalysis(data_dir='data/raw')
     viz = StockVisualizer()
 
     # 1. VERİLERİ YÜKLE

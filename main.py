@@ -230,7 +230,7 @@ class StockDataCollector:
 
         return pd.DataFrame(summary_data)
 
-    def save_data(self, data_dict, output_dir='data'):
+    def save_data(self, data_dict, output_dir='data/raw'):
         """Verileri CSV formatında kaydet"""
 
         # Klasör oluştur

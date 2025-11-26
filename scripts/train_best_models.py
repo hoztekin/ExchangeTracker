@@ -26,7 +26,7 @@ except ImportError:
 class BestModelTrainer:
     """En iyi regression modellerini eğit ve kaydet"""
 
-    def __init__(self, data_dir='data/technical'):
+    def __init__(self, data_dir='../data/technical'):
         self.data_dir = Path(data_dir)
         self.trained_models = {}
 
@@ -388,10 +388,6 @@ def main():
     print("\n📁 Dosyalar:")
     print("   • models/           → Model .pkl dosyaları")
     print("   • outputs/          → Detaylı rapor")
-    print("\n🎯 Sonraki Adımlar:")
-    print("   1. Modelleri yükle ve test et")
-    print("   2. Backtesting yap")
-    print("   3. Streamlit'e entegre et")
     print("=" * 70 + "\n")
 
 

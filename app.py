@@ -1,7 +1,14 @@
 """
 📊 Borsa Trend Analizi - Streamlit Dashboard
 Regression modellerini kullanarak hisse senedi analizi ve tahmin
++ Pipeline Otomasyon Sistemi (Opsiyonel)
 """
+import os
+import sys
+
+# Path ayarla
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE_DIR)
 
 import streamlit as st
 import pandas as pd
@@ -12,7 +19,24 @@ from pathlib import Path
 import joblib
 from datetime import datetime, timedelta
 import warnings
-import os
+import json
+
+# Pipeline modülünü TRY-CATCH ile yükle
+PIPELINE_AVAILABLE = False
+try:
+    # Önce pipeline klasörü var mı kontrol et
+    pipeline_dir = os.path.join(BASE_DIR, 'pipeline')
+    if os.path.exists(pipeline_dir) and os.path.isdir(pipeline_dir):
+        from pipeline.scheduler import PipelineScheduler
+        PIPELINE_AVAILABLE = True
+        print("✅ Pipeline modülü yüklendi")
+    else:
+        print("ℹ️ Pipeline klasörü bulunamadı (opsiyonel özellik)")
+except ImportError as e:
+    print(f"ℹ️ Pipeline modülü yok (opsiyonel): {e}")
+except Exception as e:
+    print(f"⚠️ Pipeline yükleme hatası: {e}")
+
 try:
     os.chdir('/app')
 except:
@@ -59,6 +83,15 @@ st.markdown("""
         font-weight: bold;
         font-size: 1.5rem;
     }
+    .pipeline-status {
+        padding: 0.5rem;
+        border-radius: 0.3rem;
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+    }
+    .status-idle { background-color: #e8f5e9; color: #2e7d32; }
+    .status-running { background-color: #fff3e0; color: #f57c00; }
+    .status-error { background-color: #ffebee; color: #c62828; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -223,6 +256,116 @@ def load_backtest_results():
     return results
 
 
+def load_pipeline_state():
+    """Pipeline durumunu yükle"""
+    state_file = Path('pipeline_state.json')
+    if state_file.exists():
+        try:
+            with open(state_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except:
+            return None
+    return None
+
+
+def render_pipeline_controls(selected_ticker):
+    """Pipeline kontrol panelini render et - sadece pipeline varsa"""
+    if not PIPELINE_AVAILABLE:
+        # Pipeline yoksa bilgi göster
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### 🔄 Pipeline Sistemi")
+        st.sidebar.info("""
+        Pipeline otomasyonu için `pipeline` klasörünü ekleyin.
+        
+        Şu an manuel mod aktif.
+        """)
+        return
+
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🔄 Pipeline Kontrolü")
+
+    # Pipeline state'i yükle
+    state = load_pipeline_state()
+
+    if state:
+        # Son güncelleme
+        last_update = state.get('last_update', 'Hiç güncellenmedi')
+        next_scheduled = state.get('next_scheduled', 'Bilinmiyor')
+        status = state.get('status', 'idle')
+
+        # Durum göstergesi
+        status_class = f"status-{status}"
+        status_text = {
+            'idle': '✅ Hazır',
+            'running': '⏳ Çalışıyor',
+            'error': '❌ Hata'
+        }.get(status, '❓ Bilinmiyor')
+
+        st.sidebar.markdown(
+            f'<div class="pipeline-status {status_class}">{status_text}</div>',
+            unsafe_allow_html=True
+        )
+
+        st.sidebar.text(f"Son: {last_update}")
+        st.sidebar.text(f"Sonraki: {next_scheduled}")
+
+        # Hisse bazlı bilgi
+        if selected_ticker in state.get('stocks', {}):
+            stock_info = state['stocks'][selected_ticker]
+            if stock_info.get('r2_score'):
+                st.sidebar.metric(
+                    "Model R²",
+                    f"{stock_info['r2_score']:.4f}",
+                    delta=None
+                )
+
+    # Butonlar
+    st.sidebar.markdown("---")
+    col1, col2 = st.sidebar.columns(2)
+
+    with col1:
+        update_btn = st.button("🔄 Veri\nGüncelle", use_container_width=True)
+
+    with col2:
+        train_btn = st.button("🤖 Model\nEğit", use_container_width=True)
+
+    # Buton aksiyonları
+    if update_btn:
+        with st.spinner(f"{selected_ticker} verisi güncelleniyor..."):
+            try:
+                # Session state'de scheduler yoksa oluştur
+                if 'scheduler' not in st.session_state:
+                    st.session_state.scheduler = PipelineScheduler()
+
+                result = st.session_state.scheduler.manual_update_stock(selected_ticker)
+
+                if result['data_updates'][selected_ticker]['status'] == 'updated':
+                    st.sidebar.success("✅ Veri güncellendi!")
+                    st.rerun()
+                elif result['data_updates'][selected_ticker]['status'] == 'no_new_data':
+                    st.sidebar.info("ℹ️ Yeni veri yok")
+                else:
+                    st.sidebar.error("❌ Güncelleme başarısız")
+            except Exception as e:
+                st.sidebar.error(f"❌ Hata: {str(e)}")
+
+    if train_btn:
+        with st.spinner(f"{selected_ticker} modeli eğitiliyor..."):
+            try:
+                if 'scheduler' not in st.session_state:
+                    st.session_state.scheduler = PipelineScheduler()
+
+                result = st.session_state.scheduler.manual_train_model(selected_ticker)
+
+                if result['status'] == 'trained':
+                    st.sidebar.success(f"✅ Model eğitildi!\nR²: {result['r2_score']:.4f}")
+                    st.rerun()
+                else:
+                    st.sidebar.warning(f"ℹ️ {result['status']}")
+            except Exception as e:
+                st.sidebar.error(f"❌ Hata: {str(e)}")
+
+
 def main():
     """Ana dashboard"""
 
@@ -256,6 +399,9 @@ def main():
     **Model:** {model_info['model'].upper()}  
     **Piyasa:** {'BIST-30' if 'IS' in selected_ticker else 'S&P 500'}
     """)
+
+    # Pipeline kontrollerini render et
+    render_pipeline_controls(selected_ticker)
 
     # Predictor yarat
     predictor = StockPredictor()
@@ -460,4 +606,14 @@ def main():
 
 
 if __name__ == "__main__":
+    # Scheduler'ı arka planda başlat (sadece pipeline varsa)
+    if PIPELINE_AVAILABLE and 'scheduler_started' not in st.session_state:
+        try:
+            st.session_state.scheduler = PipelineScheduler()
+            st.session_state.scheduler.start()
+            st.session_state.scheduler_started = True
+            print("✅ Scheduler başlatıldı")
+        except Exception as e:
+            print(f"⚠️ Scheduler başlatılamadı: {e}")
+
     main()

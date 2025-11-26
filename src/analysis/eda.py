@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 class ExploratoryDataAnalysis:
     """Hisse senedi verileri için kapsamlı EDA sınıfı"""
 
-    def __init__(self, data_dir='data'):
+    def __init__(self, data_dir='data/raw'):
         """
         Parameters:
         - data_dir: CSV dosyalarının bulunduğu klasör
