@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore')
 class Backtester:
     """Trading stratejisi backtesting sınıfı"""
 
-    def __init__(self, models_dir='models', data_dir='data/technical'):
+    def __init__(self, models_dir='../models', data_dir='../data/technical'):
         self.models_dir = Path(models_dir)
         self.data_dir = Path(data_dir)
         self.results = {}
