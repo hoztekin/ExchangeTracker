@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     networks:
       - exchangetrack_network
-      -
+
   pipeline:
     build:
       context: .
