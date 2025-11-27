@@ -10,21 +10,6 @@ services:
     networks:
       - exchangetrack_network
 
-  pipeline:
-    build:
-      context: .
-      dockerfile: Dockerfile.pipeline
-    container_name: exchangetrack-pipeline
-    volumes:
-      - ./data:/app/data
-      - ./models:/app/models
-      - ./logs:/app/logs
-    environment:
-      - TZ=Europe/Istanbul
-    restart: unless-stopped
-    networks:
-      - exchangetrack_network
-
 networks:
   exchangetrack_network:
     driver: bridge
