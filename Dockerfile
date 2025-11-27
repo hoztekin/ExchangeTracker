@@ -2,11 +2,14 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
 
-COPY . .
+COPY requirements-pipeline.txt .
+RUN pip install --no-cache-dir -r requirements-pipeline.txt
 
-EXPOSE 8501
+COPY pipeline/ ./pipeline/
+COPY run_pipeline.py .
 
-CMD ["streamlit", "run", "app.py", "--server.address", "0.0.0.0"]
+RUN mkdir -p /app/logs /app/data/technical /app/models
+
+CMD ["python", "run_pipeline.py"]
