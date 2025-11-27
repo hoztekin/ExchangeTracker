@@ -1,13 +1,19 @@
-# 📊 ExchangeTrack - Borsa Trend Analizi ve Tahmin Sistemi
+# 📊 ExchangeTracker - Borsa Trend Analizi ve Tahmin Sistemi
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red)
-![Status](https://img.shields.io/badge/Status-✅%20Tamamlandı-brightgreen)
+![Status](https://img.shields.io/badge/Status-✅%20Production-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 **Makine öğrenmesi ve teknik analiz kullanarak BIST-30 ve S&P 500 hisse senetlerini analiz eden ve tahmin eden profesyonel fintech sistemi.**
 
-> 🎯 **13 haftalık yoğun akademik proje → Üretim ortamında çalışan sistem**
+> 🎯 **13 haftalık akademik proje → Production-ready sistem + Otomatik pipeline**
+
+<div align="center">
+
+[🌐 Demo](http://128.140.73.107:8501) • [📖 Dokümantasyon](#proje-yapısı) • [🤝 Katkıda Bulun](#katkıda-bulunma)
+
+</div>
 
 ---
 
@@ -17,13 +23,13 @@
 ```bash
 # Repo klonla
 git clone https://github.com/hoztekin/ExchangeTracker
-cd exchangetrack
+cd ExchangeTracker
 
-# Sanal ortam
+# Sanal ortam oluştur
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Paketler
+# Bağımlılıkları yükle
 pip install -r requirements.txt
 ```
 
@@ -33,95 +39,261 @@ streamlit run app.py
 ```
 **Tarayıcı otomatik açılır:** `http://localhost:8501`
 
-### 3. Docker (Opsiyonel)
+### 3. Docker ile Deploy (Production)
 ```bash
-docker-compose up
+# Docker compose ile çalıştır
+docker-compose up -d
+
+# Logları takip et
+docker-compose logs -f
 ```
+**Production URL:** `http://128.140.73.107:8501`
 
 ---
 
 ## ✨ Temel Özellikler
 
 ### 📊 Interactive Dashboard
-- ✅ Gerçek zamanlı tahminler (Yarının fiyatı)
-- ✅ BUY/SELL/HOLD sinyalleri
-- ✅ Teknik göstergeler (RSI, MACD, Bollinger Bands, ATR)
-- ✅ Backtest performans metrikleri
-- ✅ İnteraktif Plotly grafikler
-- ✅ Çoklu hisse analizi (BIST-30 + S&P 500)
+- ✅ **Gerçek zamanlı tahminler:** Yarının kapanış fiyatı tahmini
+- ✅ **BUY/SELL/HOLD sinyalleri:** Dinamik threshold'lar (US: ±1%, TR: ±2%)
+- ✅ **15+ teknik gösterge:** RSI, MACD, Bollinger Bands, ATR, OBV, Stochastic
+- ✅ **Backtest metrikleri:** Sharpe Ratio, Maximum Drawdown, Win Rate
+- ✅ **İnteraktif grafikler:** Plotly ile zoom, pan, hover detayları
+- ✅ **Çoklu hisse analizi:** 10 BIST-30 + 10 S&P 500 hisse senedi
 
 ### 🤖 Makine Öğrenmesi
-- ✅ **Regression modelleri:** Ridge, LassoLarsCV, HuberRegressor (R² > 0.90)
-- ✅ **15+ teknik gösterge:** Otomatik hesaplama
-- ✅ **LazyPredict:** 40+ model otomatik test
-- ✅ **Backtesting:** Tarihsel performans analizi
+- ✅ **Best-in-class regression modelleri:** Ridge, LassoLarsCV (R² > 0.90)
+- ✅ **LazyPredict entegrasyonu:** 40+ model otomatik test ve karşılaştırma
+- ✅ **Akıllı feature engineering:** 15+ teknik gösterge otomatik hesaplama
+- ✅ **Backtesting simülasyonu:** Tarihsel performans doğrulama
+- ✅ **Model persistence:** Eğitilmiş modeller .pkl formatında saklanır
+
+### 🔄 Otomasyon Pipeline (Opsiyonel)
+- ✅ **Günlük otomatik güncelleme:** Her gün saat 02:00'da veri güncelleme
+- ✅ **Akıllı model yeniden eğitimi:** R² < 0.85 olduğunda otomatik retrain
+- ✅ **State management:** pipeline_state.json ile durum takibi
+- ✅ **Manuel tetikleme:** Dashboard'dan "Veri Güncelle" / "Model Eğit" butonları
+- ✅ **Error handling & logging:** Hata durumlarında detaylı loglama
+- ✅ **Graceful degradation:** Pipeline olmadan da sistem çalışır
 
 ### 📈 Veri Analizi
-- ✅ 5 yıllık tarihsel veri (Yahoo Finance)
-- ✅ 26 hisse senedi (BIST-30 + S&P 500)
-- ✅ 11+ EDA görselleştirme
-- ✅ Korelasyon & volatilite analizi
+- ✅ 5 yıllık tarihsel veri (Yahoo Finance API)
+- ✅ 20 hisse senedi (10 BIST-30 + 10 S&P 500)
+- ✅ Kapsamlı EDA görselleştirmeleri
+- ✅ Korelasyon, volatilite ve trend analizi
 
 ---
 
 ## 📁 Proje Yapısı
 
 ```
-exchangetrack/
+ExchangeTracker/
 │
-├── 📄 app.py                          ⭐ STREAMLIT DASHBOARD
-├── 📄 main.py                         📥 Veri toplama
-├── 📄 run_eda.py                      📊 EDA analizi
-├── 📄 setup_project.py                🔧 Proje kurulum
-├── 📄 requirements.txt
-├── 📄 README.md
-
+├── 📄 app.py                          ⭐ STREAMLIT DASHBOARD (Ana Uygulama)
+├── 📄 main.py                         📥 Ana veri toplama scripti
+├── 📄 run_eda.py                      📊 EDA analizi çalıştırıcı
+├── 📄 run_lazy_predict.py             🤖 LazyPredict model test
+├── 📄 run_technical_analysis.py       📈 Teknik analiz çalıştırıcı
+├── 📄 requirements.txt                📦 Python bağımlılıkları
+├── 📄 README.md                       📖 Dokümantasyon
+├── 📄 Dockerfile                      🐳 Container image tanımı
+├── 📄 docker-compose.yml              🐳 Multi-container orchestration
+├── 📄 License                         📜 MIT Lisansı
+├── 📄 .gitignore
 │
-├── 📁 data/
-│   ├── raw/                           Ham CSV dosyaları (26 hisse)
-│   ├── processed/
-│   └── technical/                     Teknik göstergeli veriler
+├── 📁 .venv/                          🐍 Virtual Environment (library root)
 │
-├── 📁 src/                            Kütüphane kodu
-│   ├── data/
-│   │   └── collector.py               StockDataCollector sınıfı
-│   ├── analysis/
-│   │   ├── eda.py                     ExploratoryDataAnalysis
-│   │   └── technical.py               TechnicalAnalysis
-│   ├── models/
-│   │   ├── lazy_model_selector.py     LazyPredict wrapper
-│   │   └── trainer.py                 Model eğitim
-│   └── utils/
-│       ├── visualization.py           Görselleştirme (Plotly, Matplotlib)
-│       └── indicators.py              15+ teknik gösterge
+├── 📁 data/                           💾 VERİ DEPOLAMA
+│   ├── raw/                           Ham CSV dosyaları (orijinal Yahoo Finance)
+│   │   ├── GARAN.IS.csv               
+│   │   ├── AAPL.csv
+│   │   └── ... (20 dosya)
+│   │
+│   └── technical/                     Teknik göstergeler eklenmiş veriler
+│       ├── GARAN.IS_technical.csv     SMA, EMA, RSI, MACD, Bollinger, ATR, vb.
+│       ├── AAPL_technical.csv
+│       └── ... (20 dosya)
 │
-├── 📁 models/                         Kaydedilmiş modeller (.pkl)
+├── 📁 models/                         🤖 EĞİTİLMİŞ ML MODELLERİ
+│   ├── GARAN_IS_lassolars_model.pkl   Model + scaler + metadata
 │   ├── AAPL_ridge_model.pkl
-│   ├── GARAN_IS_lassolars_model.pkl
-│   └── ... (16+ model dosyası)
+│   ├── MSFT_ridge_model.pkl
+│   └── ... (20+ model dosyası)
 │
-├── 📁 outputs/
-│   ├── eda_charts/                    11+ EDA grafiği
-│   ├── lazy_predict/                  Model test sonuçları
-│   └── reports/                       Analiz raporları
+├── 📁 outputs/                        📊 ANALİZ ÇIKTILARI
+│   ├── backtest_report.txt            Backtest performans raporu
+│   └── lazy_predict_results.csv       Model karşılaştırma tablosu
 │
-├── 📁 tests/
-│   └── test_models.py                 Unit testler
+├── 📁 logs/                           📝 PİPELİNE LOGLARI (oluşturulur)
+│   └── pipeline.log                   Otomatik güncelleme kayıtları
 │
-├── Dockerfile
-├── docker-compose.yml
-└── .gitignore
+├── 📁 pipeline/                       🔄 OTOMASYON SİSTEMİ (Opsiyonel)
+│   ├── __init__.py
+│   ├── config.py                      Pipeline yapılandırması
+│   │                                  - Hisse listesi (BIST30_STOCKS, SP500_STOCKS)
+│   │                                  - Eğitim parametreleri (MIN_R2_SCORE, RETRAIN_THRESHOLD_DAYS)
+│   │                                  - Scheduler ayarları (UPDATE_TIME, TIMEZONE)
+│   │
+│   ├── scheduler.py                   APScheduler ile zamanlama
+│   │                                  - Günlük otomatik çalıştırma
+│   │                                  - Manuel tetikleme fonksiyonları
+│   │                                  - State management
+│   │
+│   ├── data_updater.py                Otomatik veri güncelleme
+│   │                                  - Yahoo Finance API entegrasyonu
+│   │                                  - Teknik gösterge hesaplama
+│   │                                  - Hata yönetimi
+│   │
+│   └── model_trainer.py               Otomatik model eğitimi
+│                                      - LazyPredict ile model seçimi
+│                                      - Model performans değerlendirme
+│                                      - Threshold-based retraining
+│
+├── 📄 pipeline_state.json             📊 PİPELİNE DURUM DOSYASI
+│                                      {
+│                                        "last_update": "2025-11-27 02:00:00",
+│                                        "next_scheduled": "2025-11-28 02:00:00",
+│                                        "status": "idle",
+│                                        "stocks": {
+│                                          "GARAN.IS": {
+│                                            "last_data_update": "...",
+│                                            "last_model_update": "...",
+│                                            "r2_score": 0.9410,
+│                                            "model_status": "good"
+│                                          }
+│                                        }
+│                                      }
+│
+├── 📁 scripts/                        🛠️ YARDIMCI SCRİPTLER
+│   ├── outputs/                       Script çıktıları
+│   │   ├── __init__.py
+│   │   ├── analyze_lazy_results.py    LazyPredict sonuç analizi
+│   │   ├── backtest.py                Backtest simülasyonu
+│   │   └── train_best_models.py       En iyi modelleri eğit
+│   │
+│   └── src/                           Kaynak kod modülleri
+│       ├── analysis/                  Analiz modülleri
+│       │   └── __init__.py
+│       │
+│       ├── data/                      Veri işleme modülleri
+│       │   └── __init__.py
+│       │
+│       ├── models/                    Model eğitim modülleri
+│       │   └── __init__.py
+│       │
+│       └── utils/                     Yardımcı fonksiyonlar
+│           └── __init__.py
+│
+├── 📁 streamlit_app/                  📱 STREAMLIT UYGULAMASI (alternatif yapı)
+│
+└── 📁 tests/                          🧪 TEST DOSYALARI
+    └── (test dosyaları)
+```
+
+### 📌 Klasör Detayları
+
+#### **`data/`** - Veri Depolama
+- **`raw/`**: Yahoo Finance'ten çekilen ham CSV dosyaları
+  - Kolonlar: Date, Open, High, Low, Close, Adj Close, Volume
+  - Format: `{TICKER}.csv` (örn: GARAN_IS.csv, AAPL.csv)
+  
+- **`technical/`**: Teknik göstergeler hesaplanmış veriler
+  - Ek kolonlar: SMA_20, SMA_50, EMA_12, EMA_26, RSI, MACD, MACD_Signal, BB_Upper, BB_Lower, ATR, OBV, Stochastic
+  - Format: `{TICKER}_technical.csv`
+
+#### **`models/`** - Makine Öğrenmesi Modelleri
+- Pickle formatında kaydedilmiş model dosyaları
+- Format: `{TICKER}_{MODEL_NAME}_model.pkl`
+- İçerik yapısı:
+  ```python
+  {
+      'model': trained_model,              # Scikit-learn model objesi
+      'scaler': StandardScaler(),          # Feature normalization
+      'feature_columns': [...],            # Eğitimde kullanılan özellikler
+      'model_name': 'Ridge',               # Model ismi
+      'r2_score': 0.9385,                  # Test R² skoru
+      'mape': 1.89,                        # Mean Absolute Percentage Error
+      'trained_date': '2025-11-27'         # Eğitim tarihi
+  }
+  ```
+
+#### **`pipeline/`** - Otomasyon Sistemi (Opsiyonel)
+> **Not:** Bu klasör opsiyoneldir. Pipeline olmadan da sistem tam çalışır.
+
+- **`config.py`**: Tüm pipeline yapılandırması
+  - Hisse listeleri (BIST30_STOCKS, SP500_STOCKS)
+  - Model eğitim parametreleri (MIN_R2_SCORE, RETRAIN_THRESHOLD_DAYS)
+  - Scheduler ayarları (UPDATE_TIME, TIMEZONE)
+  - Teknik gösterge listesi (INDICATORS)
+
+- **`scheduler.py`**: APScheduler ile otomatik zamanlama
+  - `start()`: Scheduler'ı başlat
+  - `manual_update_stock(ticker)`: Tek hisse için manuel güncelleme
+  - `manual_train_model(ticker)`: Tek hisse için manuel eğitim
+  - State management (pipeline_state.json)
+
+- **`data_updater.py`**: Otomatik veri güncelleme
+  - Yahoo Finance API entegrasyonu
+  - Teknik gösterge hesaplama
+  - Hata yönetimi ve retry logic
+
+- **`model_trainer.py`**: Otomatik model eğitimi
+  - LazyPredict ile en iyi modeli bulma
+  - Mevcut model performans kontrolü
+  - Threshold-based retraining (R² < 0.85)
+
+#### **`pipeline_state.json`** - Durum Takibi
+Sistemin mevcut durumunu ve geçmiş bilgilerini tutar:
+```json
+{
+  "last_update": "2025-11-27 02:00:00",      // Son otomatik güncelleme
+  "next_scheduled": "2025-11-28 02:00:00",   // Sonraki planlanan çalışma
+  "status": "idle",                          // idle | running | error
+  "stocks": {
+    "GARAN.IS": {
+      "last_data_update": "2025-11-27 02:05:00",
+      "data_status": "updated",
+      "last_date": "2025-11-26",
+      "last_model_update": "2025-11-20 03:15:00",
+      "model_name": "LassoLarsCV",
+      "r2_score": 0.9410,
+      "model_status": "good"
+    }
+  }
+}
 ```
 
 ---
 
 ## 🎯 Desteklenen Hisseler
 
-### 🇹🇷 BIST-30 (11 hisse)
-THYAO.IS, AKBNK.IS, GARAN.IS, ISCTR.IS, EREGL.IS, SAHOL.IS, KCHOL.IS, TUPRS.IS, PETKM.IS, SISE.IS, ASELS.IS
+### 🇹🇷 BIST-30 (10 hisse)
+```
+GARAN.IS    - Garanti Bankası
+THYAO.IS    - Türk Hava Yolları
+AKBNK.IS    - Akbank
+EREGL.IS    - Ereğli Demir Çelik
+TUPRS.IS    - Tüpraş
+KCHOL.IS    - Koç Holding
+SAHOL.IS    - Sabancı Holding
+ASELS.IS    - Aselsan
+SISE.IS     - Şişe Cam
+TCELL.IS    - Turkcell
+```
 
 ### 🇺🇸 S&P 500 (10 hisse)
-AAPL, MSFT, GOOGL, AMZN, TSLA, NVDA, META, JPM, V, WMT
+```
+AAPL    - Apple Inc.
+MSFT    - Microsoft Corp.
+GOOGL   - Alphabet Inc.
+AMZN    - Amazon.com Inc.
+TSLA    - Tesla Inc.
+META    - Meta Platforms Inc.
+NVDA    - NVIDIA Corp.
+JPM     - JPMorgan Chase & Co.
+V       - Visa Inc.
+WMT     - Walmart Inc.
+```
 
 ---
 
@@ -129,213 +301,291 @@ AAPL, MSFT, GOOGL, AMZN, TSLA, NVDA, META, JPM, V, WMT
 
 ### Regression Modelleri (Production Ready)
 
-| Hisse | Model | R² Score | RMSE | MAPE |
-|-------|-------|----------|------|------|
-| GARAN_IS | LassoLarsCV | **0.9410** | 0.234 | 2.18% |
-| AAPL | Ridge | **0.9385** | 1.245 | 1.89% |
-| MSFT | HuberRegressor | **0.9799** | 0.856 | 1.54% |
-| THYAO_IS | LinearRegression | **0.8980** | 0.412 | 2.67% |
+| Hisse | Model | R² Score | RMSE | MAPE | Dataset |
+|-------|-------|----------|------|------|---------|
+| **GARAN.IS** | LassoLarsCV | **0.9410** | 0.234 | 2.18% | 5 yıl |
+| **AAPL** | Ridge | **0.9385** | 1.245 | 1.89% | 5 yıl |
+| **MSFT** | HuberRegressor | **0.9799** | 0.856 | 1.54% | 5 yıl |
+| **THYAO.IS** | LinearRegression | **0.8980** | 0.412 | 2.67% | 5 yıl |
 
-### Backtest Sonuçları (1 Yıl)
+> **Not:** R² > 0.90 skoru, modelin varyansın %90'ından fazlasını açıklayabildiğini gösterir.
 
-| Hisse | Getiri | Sharpe | Max DD | Win Rate |
-|-------|--------|--------|--------|----------|
-| GARAN_IS | **+37.68%** 🏆 | 1.12 | -25.29% | 66.7% |
-| AAPL | +5.45% | 0.33 | -28.67% | 75.0% |
+### Backtest Sonuçları (1 Yıl Simülasyonu)
+
+| Hisse | Toplam Getiri | Sharpe Ratio | Max Drawdown | İşlem Sayısı | Kazanma Oranı |
+|-------|---------------|--------------|--------------|--------------|---------------|
+| **GARAN.IS** | **+37.68%** 🏆 | 1.12 | -25.29% | 18 | 66.7% |
+| **AAPL** | +5.45% | 0.33 | -28.67% | 8 | 75.0% |
+
+**Backtest Parametreleri:**
+- Başlangıç sermayesi: $10,000
+- İşlem başına yatırım: Sermayenin %95'i
+- Komisyon: İşlem başına %0.1
+- Sinyal threshold'ları: US hisseleri ±1%, Türk hisseleri ±2%
+- Test periyodu: Son 1 yıl (252 işlem günü)
 
 ---
 
 ## 💻 Kullanım Komutları
 
-### 1️⃣ Dashboard (Main)
+### 1️⃣ Dashboard (Ana Uygulama)
 ```bash
 streamlit run app.py
 ```
-**Özellikleri:**
+**Özellikler:**
 - 💰 Mevcut fiyat + Yarın tahmini
 - 📈 BUY/SELL/HOLD sinyali
-- 🔧 15+ teknik gösterge
-- 📊 Backtest metrikleri (Sharpe, Max DD, Win Rate)
+- 🔧 15+ teknik gösterge grafiği
+- 📊 Backtest performans metrikleri
+- 🔄 Manuel veri güncelleme ve model eğitimi (pipeline varsa)
 
-### 2️⃣ Veri Güncelle
+### 2️⃣ Veri Toplama
 ```bash
 python main.py
 ```
-Tüm 26 hisse için 5 yıllık veri indir → `data/raw/*.csv`
+Tüm 20 hisse için 5 yıllık veri indir → `data/raw/*.csv`
 
 ### 3️⃣ EDA Analizi
 ```bash
 python run_eda.py
 ```
-11+ görselleştirme oluştur → `outputs/eda_charts/*.png`
+Kapsamlı görselleştirmeler oluştur
 
-### 4️⃣ Model Test (LazyPredict - 40+ model)
+### 4️⃣ Teknik Analiz
+```bash
+python run_technical_analysis.py
+```
+Teknik göstergeleri hesapla → `data/technical/*.csv`
+
+### 5️⃣ Model Test (LazyPredict - 40+ model)
 ```bash
 python run_lazy_predict.py
 ```
-Otomatik model keşfi → `outputs/lazy_predict/*.csv`
+Otomatik model keşfi → `outputs/lazy_predict_results.csv`
 
-### 5️⃣ Best Model Eğit
+### 6️⃣ En İyi Modelleri Eğit
 ```bash
-python train_best_models.py
+python scripts/outputs/train_best_models.py
 ```
 Regression modellerini eğit → `models/*.pkl`
 
-### 6️⃣ Sonuçları Analiz Et
+### 7️⃣ Backtest Simülasyonu
 ```bash
-python analyze_lazy_results.py
+python scripts/outputs/backtest.py
 ```
-LazyPredict sonuçlarını analiz → `outputs/reports/`
+1 yıllık strateji testi → `outputs/backtest_report.txt`
 
-### 7️⃣ Testler Çalıştır
+### 8️⃣ LazyPredict Sonuçlarını Analiz Et
 ```bash
-pytest tests/ -v
+python scripts/outputs/analyze_lazy_results.py
+```
+Model performans karşılaştırması
+
+---
+
+## 🐳 Docker Deployment
+
+### docker-compose.yml
+```yaml
+version: '3.8'
+
+services:
+  exchangetracker:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./pipeline_state.json:/app/pipeline_state.json
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    restart: unless-stopped
 ```
 
----
+### Dockerfile
+```dockerfile
+FROM python:3.9-slim
 
-## 🔧 Teknik Göstergeler (15+)
+WORKDIR /app
 
-### Momentum
-- **RSI (14)** - Overbought/Oversold
-- **MACD** - Trend değişimi
-- **Stochastic %K/%D** - Momentum
-- **Williams %R** - Baskı göstergesi
+# Sistem bağımlılıkları
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-### Trend
-- **SMA (20, 50, 200)** - Hareketli ortalama
-- **EMA (12, 26)** - Üstel ortalama
-- **Pivot Points** - Destek/Direnç
+# Python bağımlılıkları
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-### Volatilite
-- **Bollinger Bands** - Fiyat aralığı
-- **ATR (14)** - Gerçek aralık
-- **BB Position** - Bant içi konum
+# Uygulama dosyaları
+COPY . .
 
-### Hacim
-- **OBV** - Birikimli hacim
-- **MFI (14)** - Para akışı endeksi
-- **Volume Ratio** - Hacim oranı
+# Port
+EXPOSE 8501
 
-### Sinyal Üretimi
-Çok göstergeli ağırlıklı scoring: **BUY (≥0.5)** | **SELL (≤-0.5)** | **HOLD**
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
----
-
-## 🛠️ Teknoloji Stack
-
-| Kategori | Teknoloji |
-|----------|-----------|
-| **Backend** | Python 3.9+ |
-| **Data Processing** | Pandas, NumPy |
-| **Machine Learning** | Scikit-learn, LazyPredict |
-| **Visualization** | Plotly, Matplotlib, Seaborn |
-| **Web Framework** | Streamlit |
-| **Data Source** | Yahoo Finance API |
-| **Deployment** | Docker, Docker Compose |
-
----
-
-## 📚 Geliştirme Aşamaları (13 Hafta)
-
-| Hafta | Aşama | Durum |
-|-------|-------|-------|
-| 1-2 | Veri toplama ve temizleme | ✅ |
-| 3-4 | Keşifsel veri analizi (EDA) | ✅ |
-| 5-7 | Teknik göstergeler (15+) | ✅ |
-| 8-9 | Makine öğrenmesi modellemesi | ✅ |
-| 10-12 | Streamlit web uygulaması | ✅ |
-| 13 | Dokümantasyon & sunum | ✅ |
-
----
-
-## 🎓 Önemli Bulgular
-
-### Regression > Classification
-- **Regression:** R² > 0.90 (Çok başarılı) ✅
-- **Classification:** F1 Score < 0.70 (Düşük) ❌
-- **Sonuç:** Fiyat tahmini, sinyal sınıflandırmasından çok daha iyi
-
-### Piyasa Farkları
-| Özellik | BIST-30 | S&P 500 |
-|---------|---------|---------|
-| Volatilite | 2.34% | 1.45% |
-| Threshold | ±2% | ±1% |
-| Karakteri | Yüksek volatil | Daha istikrarlı |
-
-### En Başarılı Model: GARAN_IS
-```
-LassoLarsCV
-R² = 0.9410 (Mükemmel!)
-Backtest: +37.68% getiri, Sharpe = 1.12
+# Çalıştır
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
 ```
 
----
-
-## ⚠️ Yasal Uyarı
-
-```
-⚠️ DİSCLAİMER:
-Bu sistem SADECE eğitim ve araştırma amaçlıdır.
-❌ Finansal yatırım tavsiyesi DEĞILDIR
-❌ Profesyonel danışmanlık yerine geçmez
-✅ Algoritmalık ticaret eğitimi için tasarlandı
-
-Gerçek para ile işlem yapmadan:
-→ Profesyonel danışmanla konuşun
-→ Kendi risk yönetimi yapın
-→ Backtest sonuçlarını doğrulayın
-```
-
----
-
-## 🚀 Deployment
-
-### Local
+### Deployment Adımları
 ```bash
-streamlit run app.py
-```
+# 1. Image build et
+docker-compose build
 
-### Docker
-```bash
+# 2. Container'ı başlat
 docker-compose up -d
-# Tarayıcı: http://localhost:8501
+
+# 3. Logları kontrol et
+docker-compose logs -f
+
+# 4. Container'a bağlan (debug için)
+docker-compose exec exchangetracker bash
+
+# 5. Durdur
+docker-compose down
 ```
 
 ---
 
-## 📞 İletişim
+## 🔧 Pipeline Yapılandırması
 
-- **GitHub Issues:** Bug report ve öneriler
-- **LinkedIn:** https://www.linkedin.com/in/halil-o-a3a75b233/
+### config.py - Temel Ayarlar
+```python
+# Scheduler ayarları
+SCHEDULER_ENABLED = True
+UPDATE_TIME = time(2, 0)  # Her gün 02:00'da çalış
+TIMEZONE = 'Europe/Istanbul'
+
+# Model eğitim parametreleri
+MIN_R2_SCORE = 0.85  # Bu değerin altına düşerse yeniden eğit
+RETRAIN_THRESHOLD_DAYS = 7  # X gün geçtiyse performans kontrolü yap
+
+# Hisse listeleri
+BIST30_STOCKS = ['GARAN.IS', 'THYAO.IS', 'AKBNK.IS', ...]
+SP500_STOCKS = ['AAPL', 'MSFT', 'GOOGL', ...]
+
+# Teknik göstergeler
+INDICATORS = [
+    'SMA_20', 'SMA_50', 'EMA_12', 'EMA_26',
+    'RSI', 'MACD', 'MACD_Signal', 'BB_Upper', 'BB_Lower',
+    'ATR', 'OBV', 'Stochastic'
+]
+```
+
+### Pipeline Çalışma Mantığı
+
+```
+┌─────────────────────────────────────────────────────┐
+│  GÜNLÜK OTOMATİK ÇALIŞTIRMA (02:00)                │
+└──────────────────┬──────────────────────────────────┘
+                   │
+                   ▼
+         ┌─────────────────┐
+         │  Data Updater   │
+         │  ─────────────  │
+         │  • Yahoo Finance│
+         │  • Technical    │
+         │    Indicators   │
+         └────────┬────────┘
+                  │
+                  ▼
+         ┌─────────────────┐
+         │ Model Trainer   │
+         │ ─────────────── │
+         │ • R² kontrolü   │
+         │ • Retrain logic │
+         │ • LazyPredict   │
+         └────────┬────────┘
+                  │
+                  ▼
+         ┌─────────────────┐
+         │ State Update    │
+         │ ─────────────── │
+         │ • JSON dosyası  │
+         │ • Timestamp     │
+         │ • Performans    │
+         └─────────────────┘
+```
+
+**Akıllı Yeniden Eğitim Mantığı:**
+1. Mevcut model varsa performansını kontrol et
+2. R² < 0.85 ise → Yeniden eğit
+3. Son eğitimden 7+ gün geçtiyse → Kontrol et
+4. Yeni model daha iyiyse → Değiştir
+
+---
+
+## 🤝 Katkıda Bulunma
+
+Katkılarınızı bekliyoruz! Lütfen şu adımları izleyin:
+
+1. Fork edin
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Commit edin (`git commit -m 'feat: Add amazing feature'`)
+4. Push edin (`git push origin feature/amazing-feature`)
+5. Pull Request açın
+
+### Geliştirme Yol Haritası
+- [ ] Real-time veri akışı (WebSocket)
+- [ ] Daha fazla teknik gösterge (Ichimoku, Fibonacci)
+- [ ] Sentiment analizi (Twitter, Reddit)
+- [ ] Portfolio optimizasyonu
+- [ ] E-posta/SMS bildirimleri
+- [ ] Multi-timeframe analizi (1h, 4h, 1d)
 
 ---
 
 ## 📜 Lisans
 
-MIT License - [LICENSE](LICENSE) dosyasına bakın
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+---
+
+## 👨‍💻 Geliştirici
+
+**Halil Öztekin**
+- 🎓 Konya Teknik Üniversitesi - Bilgisayar Mühendisliği
+- 📧 Email: [haliloztekin@protonmail.com]
+- 🔗 GitHub: [@hoztekin](https://github.com/hoztekin)
+- 💼 LinkedIn: [Halil Öztekin](https://www.linkedin.com/in/halil-o-a3a75b233/)
+
+---
+
+## ⚠️ Yasal Uyarı
+
+**DİKKAT:** Bu yazılım yalnızca eğitim ve araştırma amaçlıdır.
+
+- ❌ Finansal tavsiye değildir
+- ❌ Yatırım garantisi vermez
+- ❌ Gerçek parayla işlem yapmadan önce profesyonel danışman görüşü alın
+- ⚠️ Geçmiş performans gelecek getiriyi garanti etmez
+- ⚠️ Borsa yatırımları risk içerir, sermaye kaybı yaşayabilirsiniz
+
+**Geliştirici, bu yazılımın kullanımından kaynaklanan herhangi bir finansal kayıptan sorumlu tutulamaz.**
 
 ---
 
 ## 🙏 Teşekkürler
 
-Açık kaynak kütüphanelere:
-- yfinance (Yahoo Finance API)
-- pandas, numpy (Veri işleme)
-- scikit-learn (Makine öğrenmesi)
-- streamlit (Web framework)
-- plotly (Grafikler)
+- [Streamlit](https://streamlit.io/) - Dashboard framework
+- [Yahoo Finance](https://finance.yahoo.com/) - Veri kaynağı
+- [LazyPredict](https://github.com/shankarpandala/lazypredict) - Otomatik model seçimi
+- [Plotly](https://plotly.com/) - İnteraktif grafikler
+- [Scikit-learn](https://scikit-learn.org/) - Makine öğrenmesi kütüphanesi
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by Halil Öztekin**
+**⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!**
 
-⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!
-
-[GitHub](https://github.com/hoztekin) • [LinkedIn](https://www.linkedin.com/in/halil-o-a3a75b233/)
-
-**Status:** ✅ Production Ready | Last Updated: November 2025
+[⬆ Başa Dön](#-exchangetracker---borsa-trend-analizi-ve-tahmin-sistemi)
 
 </div>

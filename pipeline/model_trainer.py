@@ -105,7 +105,13 @@ class ModelTrainer:
 
             logger.info(f"✓ Features hazırlandı: {len(X_train)} train, {len(X_test)} test")
             logger.info(f"✓ Feature sayısı: {len(available_features)}")
-            return X_train, X_test, y_train, y_test, available_features
+
+            # Scaler ekle (train_model bunu bekliyor)
+            from sklearn.preprocessing import StandardScaler
+            scaler = StandardScaler()
+            scaler.fit(X_train)
+
+            return X_train, X_test, y_train, y_test, scaler, available_features
 
         except Exception as e:
             logger.error(f"✗ Feature hazırlama hatası: {e}")
@@ -113,18 +119,18 @@ class ModelTrainer:
 
     def train_model(self, ticker: str, force_retrain: bool = False) -> dict:
         """
-        Model eğit veya mevcut modeli değerlendir
+        Model eğit veya mevcut modeli kullan
         """
-        logger.info(f"🤖 {ticker} için model eğitimi başlıyor...")
+        logger.info(f"🎯 Model eğitimi kontrol: {ticker}")
 
-        # Veriyi yükle
+        # Veri yükle
         df = self.load_data(ticker)
         if df is None:
             return {'status': 'error', 'message': 'Veri yüklenemedi'}
 
-        # Features hazırla
-        X_train, X_test, y_train, y_test, feature_cols = self.prepare_features(df)
-        if X_train is None:
+        # Feature'ları hazırla
+        X_train, X_test, y_train, y_test, scaler, feature_columns = self.prepare_features(df)
+        if X_test is None:
             return {'status': 'error', 'message': 'Feature hazırlama hatası'}
 
         # Mevcut model var mı kontrol et
@@ -163,36 +169,32 @@ class ModelTrainer:
         # Model eğitimi gerekiyorsa
         if retrain_needed or not os.path.exists(model_path):
             try:
-                logger.info("🔄 LazyPredict ile model eğitimi başlıyor...")
+                logger.info("🔄 Model eğitimi başlıyor (Ridge)")
 
-                # LazyPredict
-                reg = LazyRegressor(verbose=0, ignore_warnings=True, custom_metric=None)
-                models, predictions = reg.fit(X_train, X_test, y_train, y_test)
+                # Ridge modeli kullan
+                from sklearn.linear_model import Ridge
 
-                # En iyi modeli seç
-                best_model_name = models.index[0]
-                best_r2 = models.iloc[0]['R-Squared']
+                model = Ridge(alpha=1.0, random_state=42)
+                model.fit(X_train, y_train)
 
-                logger.info(f"✓ En iyi model: {best_model_name} (R²: {best_r2:.4f})")
-
-                # MAPE hesapla
-                y_pred = predictions[best_model_name]
+                # Performans değerlendir
+                y_pred = model.predict(X_test)
+                r2 = r2_score(y_test, y_pred)
                 mape = mean_absolute_percentage_error(y_test, y_pred) * 100
 
-                # Model datasını kaydet
+                logger.info(f"✓ Model eğitildi - R²: {r2:.4f}, MAPE: {mape:.2f}%")
+
+                # Model kaydet
                 model_data = {
-                    'model': reg.models[best_model_name],
-                    'model_name': best_model_name,
-                    'r2_score': best_r2,
+                    'model': model,
+                    'scaler': scaler,
+                    'feature_columns': feature_columns,
+                    'model_name': 'Ridge',
+                    'r2_score': r2,
                     'mape': mape,
-                    'feature_cols': feature_cols,
-                    'trained_date': datetime.now().isoformat(),
-                    'data_range': f"{df.index[0].date()} to {df.index[-1].date()}",
-                    'train_size': len(X_train),
-                    'test_size': len(X_test)
+                    'trained_date': datetime.now().isoformat()
                 }
 
-                # Modeli kaydet
                 with open(model_path, 'wb') as f:
                     pickle.dump(model_data, f)
 
@@ -201,10 +203,9 @@ class ModelTrainer:
                 return {
                     'status': 'trained',
                     'ticker': ticker,
-                    'model_name': best_model_name,
-                    'r2_score': best_r2,
+                    'model_name': 'Ridge',
+                    'r2_score': r2,
                     'mape': mape,
-                    'trained_date': model_data['trained_date'],
                     'timestamp': datetime.now().isoformat()
                 }
 
