@@ -1,0 +1,115 @@
+name: Build and Deploy Exchange Track App
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: exchangetrack/exchangetrack-app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: "📥 Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "🧰 Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+
+      - name: "🔐 Log in to GitHub Container Registry"
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📝 Extract metadata for API"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix={{branch}}-
+
+      - name: "🔧 Build and push API image"
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./B2B.Api/Api/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: "📋 Image digest (info)"
+        run: |
+          echo "API Image tags: ${{ steps.meta.outputs.tags }}"
+
+      - name: "🚀 Update Portainer Stack"
+        env:
+          PORTAINER_URL: ${{ secrets.PORTAINER_URL }}
+          PORTAINER_TOKEN: ${{ secrets.PORTAINER_TOKEN }}
+          PORTAINER_ENDPOINT_ID: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+          STACK_NAME: ${{ secrets.PORTAINER_STACK_NAME }}
+          API_IMAGE_FQN: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        run: |
+          set -euo pipefail
+
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update -y && sudo apt-get install -y jq
+          fi
+
+          # Auth header
+          HDR="Authorization: Bearer ${PORTAINER_TOKEN}"
+          EID="${PORTAINER_ENDPOINT_ID}"
+          BASE="${PORTAINER_URL%/}/api"
+
+          echo "🔎 Finding stack ID for '${STACK_NAME}'..."
+          STACKS=$(curl -ks -H "$HDR" "$BASE/stacks?endpointId=$EID")
+          SID=$(echo "$STACKS" | jq -r --arg N "$STACK_NAME" '[.[] | select(.Name==$N) | .Id] | first // empty')
+          
+          if [ -z "${SID}" ]; then
+            echo "❌ Stack not found: $STACK_NAME"
+            echo "$STACKS" | jq -r '.[]|"\(.Id)\t\(.Name)"'
+            exit 1
+          fi
+          echo "✅ Stack ID: $SID"
+
+          # Find container IDs for app-api
+          echo "🔍 Finding app-api container..."
+          LIST=$(curl -ks -H "$HDR" "$BASE/endpoints/$EID/docker/containers/json?all=0")
+          API_CID=$(echo "$LIST" | jq -r --arg S "$STACK_NAME" \
+            '.[] | select(.Labels["com.docker.compose.project"]==$S and (.Names[] | contains("app-api"))) | .Id' | head -n1)
+
+          if [ -z "${API_CID}" ]; then
+            echo "❌ app-api container not found in stack: $STACK_NAME"
+            exit 1
+          fi
+          echo "✅ Container ID: $API_CID"
+
+          # Pull latest image
+          echo "📦 Pulling latest image: ${API_IMAGE_FQN}"
+          curl -ks -H "$HDR" \
+            "$BASE/endpoints/$EID/docker/images/create?fromImage=${API_IMAGE_FQN%:*}&tag=${API_IMAGE_FQN##*:}" \
+            -X POST >/dev/null
+
+          # Restart container
+          echo "♻️  Restarting app-api container..."
+          curl -ks -H "$HDR" \
+            -X POST "$BASE/endpoints/$EID/docker/containers/$API_CID/restart?timeout=10" >/dev/null
+
+          echo ""
+          echo "🎉 Deployment completed successfully!"
+          echo "   - Image: ${API_IMAGE_FQN}"
+          echo "   - Stack: ${STACK_NAME}"
+          echo "   - Container restarted: app-api"

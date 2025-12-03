@@ -1,0 +1,51 @@
+name: Portainer Connection Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-portainer:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "🔍 Test Portainer Connection"
+        env:
+          PORTAINER_URL: ${{ secrets.PORTAINER_URL }}
+          PORTAINER_TOKEN: ${{ secrets.PORTAINER_TOKEN }}
+          PORTAINER_ENDPOINT_ID: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+          PORTAINER_STACK_NAME: ${{ secrets.PORTAINER_STACK_NAME }}
+        run: |
+          echo "🌐 Portainer URL: $PORTAINER_URL"
+          echo "🎯 Endpoint ID: $PORTAINER_ENDPOINT_ID"
+          echo "📦 Stack Name: $PORTAINER_STACK_NAME"
+          echo ""
+          
+          # Test 1: List endpoints
+          echo "===== 📋 ENDPOINTS ====="
+          curl -k -s -H "Authorization: Bearer $PORTAINER_TOKEN" \
+            "$PORTAINER_URL/api/endpoints" | jq '.' || echo "❌ Endpoints listelenemedi"
+          echo ""
+          
+          # Test 2: List stacks
+          echo "===== 📚 STACKS (Endpoint $PORTAINER_ENDPOINT_ID) ====="
+          curl -k -s -H "Authorization: Bearer $PORTAINER_TOKEN" \
+            "$PORTAINER_URL/api/stacks?endpointId=$PORTAINER_ENDPOINT_ID" | jq '.' || echo "❌ Stacks listelenemedi"
+          echo ""
+          
+          # Test 3: Check if our stack exists
+          echo "===== 🔎 STACK SEARCH: '$PORTAINER_STACK_NAME' ====="
+          STACKS=$(curl -k -s -H "Authorization: Bearer $PORTAINER_TOKEN" \
+            "$PORTAINER_URL/api/stacks?endpointId=$PORTAINER_ENDPOINT_ID")
+          
+          STACK_ID=$(echo "$STACKS" | jq -r --arg NAME "$PORTAINER_STACK_NAME" \
+            '.[] | select(.Name==$NAME) | .Id')
+          
+          if [ -n "$STACK_ID" ]; then
+            echo "✅ Stack bulundu! ID: $STACK_ID"
+          else
+            echo "ℹ️  Stack henüz oluşturulmamış: $PORTAINER_STACK_NAME"
+            echo "   (Bu normal, ilk deployment'tan sonra görünecek)"
+          fi
+          
+          echo ""
+          echo "✅ Portainer bağlantı testi başarılı!"
