@@ -6,9 +6,27 @@ services:
     container_name: exchangetrack-app
     ports:
       - "8501:8501"
+    volumes:
+      # Kalıcı veri için volume mount'lar
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./outputs:/app/outputs
+      - ./pipeline_state.json:/app/pipeline_state.json
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+      - TZ=Europe/Istanbul
     restart: unless-stopped
     networks:
       - exchangetrack_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 networks:
   exchangetrack_network:

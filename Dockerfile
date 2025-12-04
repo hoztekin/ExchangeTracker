@@ -2,14 +2,29 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y gcc g++ && rm -rf /var/lib/apt/lists/*
+# Sistem bağımlılıkları
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY requirements-pipeline.txt .
-RUN pip install --no-cache-dir -r requirements-pipeline.txt
+# Python bağımlılıkları
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY pipeline/ ./pipeline/
-COPY run_pipeline.py .
+# Uygulama dosyalarını kopyala
+COPY . .
 
-RUN mkdir -p /app/logs /app/data/technical /app/models
+# Gerekli klasörleri oluştur
+RUN mkdir -p /app/logs /app/data/raw /app/data/technical /app/models /app/outputs
 
-CMD ["python", "run_pipeline.py"]
+# Port
+EXPOSE 8501
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8501/_stcore/health || exit 1
+
+# Streamlit'i başlat
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
