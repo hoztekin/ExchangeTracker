@@ -772,7 +772,7 @@ Bu projeyi hayata geçiren açık kaynak projelere ve teknolojilere teşekkürle
 **Bölüm:** Bilgisayar Mühendisliği  
 **Dönem:** 2024-2025 Güz Dönemi  
 **Süre:** 13 hafta  
-**Danışman:** Doç.Drç Sait Ali UYMAZ (sauymaz@ktun.edu.tr)
+**Danışman:** Doç.Dr. Sait Ali UYMAZ (sauymaz@ktun.edu.tr)
 
 **Kullanılan Teknolojiler:**
 - Python 3.9+
