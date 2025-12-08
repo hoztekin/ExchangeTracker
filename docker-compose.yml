@@ -1,33 +1,44 @@
 ﻿version: '3.8'
 
+networks:
+  exchangetracker-net:
+    driver: bridge
+
 services:
-  streamlit-app:
+  exchangetracker:
     image: ghcr.io/hoztekin/exchangetracker:latest
-    container_name: exchangetrack-app
+    container_name: exchangetracker_app
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8501:8501"
+    networks:
+      - exchangetracker-net
     volumes:
-      # Kalıcı veri için volume mount'lar
-      - ./data:/app/data
-      - ./models:/app/models
-      - ./logs:/app/logs
-      - ./outputs:/app/outputs
-      - ./pipeline_state.json:/app/pipeline_state.json
+      - exchangetracker_data:/app/data
+      - exchangetracker_models:/app/models
+      - exchangetracker_logs:/app/logs
+      - ./pipeline_state.json:/app/pipeline_state.json:rw
     environment:
       - STREAMLIT_SERVER_PORT=8501
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
       - STREAMLIT_SERVER_HEADLESS=true
-      - TZ=Europe/Istanbul
+      - PYTHONUNBUFFERED=1
     restart: unless-stopped
-    networks:
-      - exchangetrack_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
       start_period: 40s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-networks:
-  exchangetrack_network:
-    driver: bridge
+volumes:
+  exchangetracker_data:
+  exchangetracker_models:
+  exchangetracker_logs:
