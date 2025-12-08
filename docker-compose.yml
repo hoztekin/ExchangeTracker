@@ -2,7 +2,7 @@
 
 services:
   streamlit-app:
-    build: .
+    image: ghcr.io/hoztekin/exchangetracker:latest
     container_name: exchangetrack-app
     ports:
       - "8501:8501"
