@@ -1,0 +1,17 @@
+name: Portainer Connection Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Portainer Connection
+        env:
+          PORTAINER_URL: ${{ secrets.PORTAINER_URL }}
+          PORTAINER_TOKEN: ${{ secrets.PORTAINER_TOKEN }}
+        run: |
+          echo "Testing: $PORTAINER_URL"
+          curl -v "$PORTAINER_URL/api/endpoints" \
+            -H "Authorization: Bearer $PORTAINER_TOKEN"
