@@ -224,6 +224,14 @@ if __name__ == "__main__":
     scheduler = PipelineScheduler()
     print("State:", json.dumps(scheduler.get_state(), indent=2))
 
+    # 1. Veri güncelle
+    updater = DataUpdater()
+    print("Data update:", updater.update_stock('GARAN.IS'))
+
+    # 2. Modeli eğit
+    trainer = ModelTrainer()
+    print("Model train:", trainer.train_model('GARAN.IS'))
+
     # Manuel test
     # result = scheduler.manual_update_stock('GARAN.IS')
     # print("Result:", json.dumps(result, indent=2))

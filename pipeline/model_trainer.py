@@ -32,7 +32,7 @@ class ModelTrainer:
         """CSV'den veri yükle - technical klasöründen"""
         # Ticker formatını düzelt
         filename = ticker.replace('.', '_').replace('^', '').replace('=', '_')
-        file_path = os.path.join(self.data_dir, f"{filename}_technical.csv")
+        file_path = os.path.join(self.data_dir, f"{filename}_data.csv")
 
         if os.path.exists(file_path):
             try:
